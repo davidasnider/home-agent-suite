@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "tomorrow-io-client"
+version = "0.1.0"
+description = "A client library for the Tomorrow.io API."
+authors =
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+requests-mock = "^1.11.0"
