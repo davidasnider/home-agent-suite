@@ -1,6 +1,5 @@
 import pytest
 import requests
-import requests_mock
 from tomorrow_io_client.client import TomorrowIoTool
 
 MOCK_API_KEY = "test_api_key"
