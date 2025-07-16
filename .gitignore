@@ -1,0 +1,10 @@
+# Poetry
+
+.venv/
+poetry.lock
+Environment
+.env
+
+Python
+pycache/
+*.pyc
