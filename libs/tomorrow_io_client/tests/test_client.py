@@ -1,4 +1,5 @@
 import pytest
+import requests
 import requests_mock
 from tomorrow_io_client.client import TomorrowIoTool
 
