@@ -2,7 +2,7 @@
 name = "tomorrow-io-client"
 version = "0.1.0"
 description = "A client library for the Tomorrow.io API."
-authors =
+authors = ["David Snider <david@davidsnider.org>"]
 [tool.poetry.dependencies]
 python = "^3.11"
 requests = "^2.31.0"
