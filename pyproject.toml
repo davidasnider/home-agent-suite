@@ -1,15 +1,24 @@
-[tool.black]
-line-length = 88
-target-version = ['py311']
-[tool.flake8]
-max-line-length = 88
-extend-ignore = "E203"
- 
 [tool.poetry]
 name = "home-agent-suite"
 version = "0.1.0"
-description = "Monorepo for home agent suite"
-authors = ["Your Name <your@email.com>"]
+description = "A multi-agent, multi-tool bot for home automation."
+authors = [ "David Snider <david@davidsnider.org>" ]
+readme = "README.md"
 
+# Add a new dependencies section for shared dev tools
 [tool.poetry.dependencies]
 python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.0"
+black = "^24.4.2"
+flake8 = "^7.0.0"
+detect-secrets = "^1.5.0"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = "E203"

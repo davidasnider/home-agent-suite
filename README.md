@@ -217,6 +217,79 @@ extend-ignore = "E203" # Rule incompatible with black's slice formatting
 
 This configuration establishes a high-quality, automated feedback loop. Any code pushed to the repository will be immediately validated, ensuring that standards are maintained and that the codebase remains healthy and consistent as it grows.
 
+### Section 1.4: Pre-commit Hooks for Code Quality and Secret Detection
+
+To further automate code quality and security, this project uses [`pre-commit`](https://pre-commit.com/) to run checks before every commit. This ensures that code is consistently formatted, linted, and scanned for secrets before entering the repository.
+
+#### Why Use Pre-commit?
+
+- **Automated Formatting:** Ensures all code is auto-formatted with `black` before commit.
+- **Linting:** Runs `flake8` to catch style and error issues early.
+- **Secret Detection:** Uses `detect-secrets` to prevent accidental commits of sensitive information (API keys, credentials, etc.).
+- **Consistency:** Enforces standards across all contributors and environments.
+
+#### Installation
+
+Install `pre-commit` globally or within your Poetry environment:
+
+```bash
+poetry add --dev pre-commit
+```
+Or, with pip:
+```bash
+pip install pre-commit
+```
+
+#### Configuration
+
+Add a `.pre-commit-config.yaml` file to the repository root with recommended hooks:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.4.0
+    hooks:
+      - id: black
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+```
+
+Initialize pre-commit in your repo:
+
+```bash
+pre-commit install
+```
+
+To manually run all checks on all files:
+
+```bash
+pre-commit run --all-files
+```
+
+#### Secret Detection Baseline
+
+After adding `detect-secrets`, generate a baseline file:
+
+```bash
+detect-secrets scan > .secrets.baseline
+```
+
+This baseline is used to track and audit secrets in the codebase. Update it as needed when new secrets are added or removed.
+
+#### Integration with CI
+
+Pre-commit hooks can also be run in CI pipelines to enforce checks on all pushed code, ensuring that no code bypasses local checks.
+
+This setup provides an additional layer of security and code quality, complementing the CI/CD workflows described above.
+
 ## Part 2: Cloud Infrastructure and Operations
 
 This part of the plan details the strategy for deploying, running, and observing the agent on Google Cloud Platform (GCP). The focus is on selecting the right services for the project's current and future needs, implementing secure practices for managing credentials, and establishing a solid foundation for observability from day one.
@@ -336,7 +409,7 @@ from libs.tomorrow_io_client.client import TomorrowIoTool # The custom tool
 
 # It is recommended to use a specific model version for production stability
 # For example, "gemini-1.5-flash-001"
-MODEL_NAME = "gemini-1.5-flash-latest" 
+MODEL_NAME = "gemini-1.5-flash-latest"
 
 day_planner_agent = LlmAgent(
     name="DayPlannerAgent",
@@ -388,7 +461,7 @@ Like the Day Planner, the `HomeAssistantAgent` will be an instance of `LlmAgent`
 from google.adk.agents import LlmAgent
 from libs.home_assistant_client.client import HomeAssistantTool
 
-MODEL_NAME = "gemini-1.5-flash-latest" 
+MODEL_NAME = "gemini-1.5-flash-latest"
 
 home_assistant_agent = LlmAgent(
     name="HomeAssistantAgent",
@@ -438,13 +511,13 @@ from agents.day_planner.agent import day_planner_agent
 from agents.home_assistant_agent.agent import home_assistant_agent
 
 # Use a more capable model for complex routing decisions if necessary
-MODEL_NAME = "gemini-1.5-pro-latest" 
+MODEL_NAME = "gemini-1.5-pro-latest"
 
 supervisor_agent = LlmAgent(
     name="SupervisorAgent",
     model=MODEL_NAME,
     # The supervisor has no tools of its own; its "tools" are the sub-agents.
-    tools=, 
+    tools=,
     sub_agents=[
         day_planner_agent,
         home_assistant_agent
