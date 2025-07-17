@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 import requests
+import tzlocal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -29,29 +30,38 @@ class TomorrowIoTool:
         response = requests.get(self.settings.base_url, params=params)
         response.raise_for_status()
         data = response.json()
-        hours = data.get("timelines", {}).get("hourly", [])
+        # The v4 API returns timelines in data["timelines"]["hourly"]
+        try:
+            hours = data.get("timelines", {}).get("hourly", [])
+        except (KeyError, TypeError):
+            hours = []
         if not hours:
             return "No hourly weather data available."
 
         # Define time ranges for morning, afternoon, evening
-        today = datetime.now(tz=timezone.utc).date()
-        morning_hours = [8, 9, 10, 11, 12]
-        afternoon_hours = [13, 14, 15, 16, 17]
-        evening_hours = [18, 19, 20, 21]
+
+        local_tz = tzlocal.get_localzone()
+        today_local = datetime.now(local_tz).date()
+        morning_hours = range(8, 12)  # 8am up to 12pm
+        afternoon_hours = range(12, 17)  # 12pm up to 5pm
+        evening_hours = range(17, 22)  # 5pm up to 10pm
 
         def summarize_period(hourly_data, hour_range):
             temps = []
             prec_probs = []
             clouds = []
             for entry in hourly_data:
-                dt = datetime.fromisoformat(
-                    entry["time"].replace("Z", "+00:00")
-                ).astimezone(tz=timezone.utc)
-                if dt.date() != today:
-                    continue
-
-                if dt.hour in hour_range:
+                try:
+                    dt_utc = datetime.fromisoformat(entry["time"]).astimezone(
+                        timezone.utc
+                    )
+                    dt_local = dt_utc.astimezone(local_tz)
                     values = entry.get("values", {})
+                except (ValueError, KeyError, TypeError):
+                    continue
+                if dt_local.date() != today_local:
+                    continue
+                if dt_local.hour in hour_range:
                     temps.append(values.get("temperature", 0))
                     prec_probs.append(values.get("precipitationProbability", 0))
                     clouds.append(values.get("cloudCover", 0))
@@ -73,11 +83,33 @@ class TomorrowIoTool:
         afternoon = summarize_period(hours, afternoon_hours)
         evening = summarize_period(hours, evening_hours)
 
-        summary = "Today's forecast - "
+        # Build the summary string cleanly from available parts.
+        summary_parts = []
         if morning:
-            summary += f"Morning (8am-12pm): {morning}. "
+            summary_parts.append(f"Morning (8am-1pm): {morning}")
         if afternoon:
-            summary += f"Afternoon (12pm-5pm): {afternoon}. "
+            summary_parts.append(f"Afternoon (1pm-6pm): {afternoon}")
         if evening:
-            summary += f"Evening (6pm-9pm): {evening}."
-        return summary.strip()
+            summary_parts.append(f"Evening (6pm-10pm): {evening}")
+
+        if not summary_parts:
+            return "No forecast data available for today."
+
+        return "Today's forecast - " + ". ".join(summary_parts) + "."
+
+
+# This block allows the file to be run directly for debugging against the live API.
+# It will not run when the module is imported by other code.
+if __name__ == "__main__":
+    print("--- Running TomorrowIoTool in Direct Debug Mode ---")
+    tool = TomorrowIoTool()
+    # Replace with any location you want to test live.
+    test_location = "kalispell"
+    print(f"Fetching weather summary for: {test_location}")
+    try:
+        live_summary = tool.get_daily_summary(location=test_location)
+        print("\n--- Live API Weather Summary ---")
+        print(live_summary)
+    except requests.exceptions.RequestException as e:
+        print("\n--- An API error occurred ---")
+        print(f"Error: {e}")
