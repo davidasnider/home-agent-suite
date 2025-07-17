@@ -10,7 +10,9 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
+
 settings = Settings()  # type: ignore values come from .env or environment variables
+
 
 class TomorrowIoTool:
     def __init__(self):
@@ -18,7 +20,12 @@ class TomorrowIoTool:
         self.settings = settings
 
     def get_daily_summary(self, location: str) -> str:
-        params = {"location": location, "timesteps": "1h", "units": "imperial", "apikey": self.settings.tomorrow_io_api_key}
+        params = {
+            "location": location,
+            "timesteps": "1h",
+            "units": "imperial",
+            "apikey": self.settings.tomorrow_io_api_key,
+        }
         response = requests.get(self.settings.base_url, params=params)
         response.raise_for_status()
         data = response.json()
@@ -37,7 +44,9 @@ class TomorrowIoTool:
             prec_probs = []
             clouds = []
             for entry in hourly_data:
-                dt = datetime.fromisoformat(entry["time"].replace("Z", "+00:00")).astimezone(tz=timezone.utc)
+                dt = datetime.fromisoformat(
+                    entry["time"].replace("Z", "+00:00")
+                ).astimezone(tz=timezone.utc)
                 if dt.date() != today:
                     continue
 
