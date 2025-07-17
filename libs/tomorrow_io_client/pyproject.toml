@@ -7,6 +7,8 @@ authors = ["David Snider <david@davidsnider.org>"]
 python = "^3.11"
 requests = "^2.31.0"
 python-dotenv = "^1.0.0"
+pydantic = "^2.11.7"
+pydantic-settings = "^2.10.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"

@@ -1,24 +1,25 @@
-import os
-from dotenv import load_dotenv
+from datetime import datetime, timezone
+
 import requests
-from datetime import datetime
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    tomorrow_io_api_key: str
+    base_url: str = "https://api.tomorrow.io/v4/weather/forecast"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+settings = Settings()  # type: ignore values come from .env or environment variables
 
 class TomorrowIoTool:
     def __init__(self):
-        load_dotenv()
-        self.api_key = os.getenv("TOMORROW_IO_API_KEY")
-        if not self.api_key:
-            raise ValueError("TOMORROW_IO_API_KEY not found in environment variables.")
-        self.base_url = "https://api.tomorrow.io/v4/weather/forecast"
+        # Use the pre-initialized, shared instance of the settings.
+        self.settings = settings
 
     def get_daily_summary(self, location: str) -> str:
-        params = {
-            "location": location,
-            "timesteps": "1h",
-            "units": "imperial",
-            "apikey": self.api_key
-        }
-        response = requests.get(self.base_url, params=params)
+        params = {"location": location, "timesteps": "1h", "units": "imperial", "apikey": self.settings.tomorrow_io_api_key}
+        response = requests.get(self.settings.base_url, params=params)
         response.raise_for_status()
         data = response.json()
         hours = data.get("timelines", {}).get("hourly", [])
@@ -26,6 +27,7 @@ class TomorrowIoTool:
             return "No hourly weather data available."
 
         # Define time ranges for morning, afternoon, evening
+        today = datetime.now(tz=timezone.utc).date()
         morning_hours = [8, 9, 10, 11, 12]
         afternoon_hours = [13, 14, 15, 16, 17]
         evening_hours = [18, 19, 20, 21]
@@ -35,7 +37,10 @@ class TomorrowIoTool:
             prec_probs = []
             clouds = []
             for entry in hourly_data:
-                dt = datetime.fromisoformat(entry["time"].replace("Z", "+00:00"))
+                dt = datetime.fromisoformat(entry["time"].replace("Z", "+00:00")).astimezone(tz=timezone.utc)
+                if dt.date() != today:
+                    continue
+
                 if dt.hour in hour_range:
                     values = entry.get("values", {})
                     temps.append(values.get("temperature", 0))

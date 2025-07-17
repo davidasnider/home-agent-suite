@@ -1,6 +1,7 @@
 import pytest
 import requests
-from tomorrow_io_client.client import TomorrowIoTool
+from tomorrow_io_client import TomorrowIoTool
+from datetime import datetime, timezone
 
 MOCK_API_KEY = "test_api_key"
 MOCK_LOCATION = "New York, NY"
@@ -13,12 +14,12 @@ def set_env(monkeypatch):
 SAMPLE_RESPONSE = {
     "timelines": {
         "hourly": [
-            {"time": "2025-07-15T08:00:00Z", "values": {"temperature": 70, "precipitationProbability": 15, "cloudCover": 40}},
-            {"time": "2025-07-15T09:00:00Z", "values": {"temperature": 72, "precipitationProbability": 10, "cloudCover": 20}},
-            {"time": "2025-07-15T13:00:00Z", "values": {"temperature": 80, "precipitationProbability": 5, "cloudCover": 10}},
-            {"time": "2025-07-15T14:00:00Z", "values": {"temperature": 84, "precipitationProbability": 5, "cloudCover": 5}},
-            {"time": "2025-07-15T18:00:00Z", "values": {"temperature": 78, "precipitationProbability": 0, "cloudCover": 0}},
-            {"time": "2025-07-15T19:00:00Z", "values": {"temperature": 76, "precipitationProbability": 0, "cloudCover": 0}},
+            {"time": datetime.now(tz=timezone.utc).replace(hour=8, minute=0, second=0, microsecond=0).isoformat(), "values": {"temperature": 70, "precipitationProbability": 15, "cloudCover": 40}},
+            {"time": datetime.now(tz=timezone.utc).replace(hour=9, minute=0, second=0, microsecond=0).isoformat(), "values": {"temperature": 72, "precipitationProbability": 10, "cloudCover": 20}},
+            {"time": datetime.now(tz=timezone.utc).replace(hour=13, minute=0, second=0, microsecond=0).isoformat(), "values": {"temperature": 80, "precipitationProbability": 5, "cloudCover": 10}},
+            {"time": datetime.now(tz=timezone.utc).replace(hour=14, minute=0, second=0, microsecond=0).isoformat(), "values": {"temperature": 84, "precipitationProbability": 5, "cloudCover": 5}},
+            {"time": datetime.now(tz=timezone.utc).replace(hour=18, minute=0, second=0, microsecond=0).isoformat(), "values": {"temperature": 78, "precipitationProbability": 0, "cloudCover": 0}},
+            {"time": datetime.now(tz=timezone.utc).replace(hour=19, minute=0, second=0, microsecond=0).isoformat(), "values": {"temperature": 76, "precipitationProbability": 0, "cloudCover": 0}},
         ]
     }
 }
