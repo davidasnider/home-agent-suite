@@ -76,3 +76,12 @@ def test_get_daily_summary_api_error(requests_mock):
     tool = TomorrowIoTool()
     with pytest.raises(requests.exceptions.HTTPError):
         tool.get_daily_summary(MOCK_LOCATION)
+
+
+def test_get_daily_summary_no_hourly_data(requests_mock):
+    # API returns a valid response but with an empty hourly timeline
+    empty_response = {"timelines": {"hourly": []}}
+    requests_mock.get(MOCK_URL, json=empty_response, status_code=200)
+    tool = TomorrowIoTool()
+    summary = tool.get_daily_summary(MOCK_LOCATION)
+    assert summary == "No hourly weather data available."
