@@ -86,11 +86,11 @@ class TomorrowIoTool:
         # Build the summary string cleanly from available parts.
         summary_parts = []
         if morning:
-            summary_parts.append(f"Morning (8am-1pm): {morning}")
+            summary_parts.append(f"Morning (8am-12pm): {morning}")
         if afternoon:
-            summary_parts.append(f"Afternoon (1pm-6pm): {afternoon}")
+            summary_parts.append(f"Afternoon (12pm-5pm): {afternoon}")
         if evening:
-            summary_parts.append(f"Evening (6pm-10pm): {evening}")
+            summary_parts.append(f"Evening (5pm-10pm): {evening}")
 
         if not summary_parts:
             return "No forecast data available for today."
