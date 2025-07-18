@@ -9,3 +9,6 @@ Python
 pycache/
 *.pyc
 .vscode/launch.json
+
+.pytest_cache/
+**/__pycache__/
