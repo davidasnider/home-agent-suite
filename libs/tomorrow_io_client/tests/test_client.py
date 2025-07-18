@@ -13,76 +13,55 @@ def set_env(monkeypatch):
     monkeypatch.setenv("TOMORROW_IO_API_KEY", MOCK_API_KEY)
 
 
-SAMPLE_RESPONSE = {
-    "timelines": {
-        "hourly": [
-            {
-                "time": datetime.now(tz=timezone.utc)
-                .replace(hour=8, minute=0, second=0, microsecond=0)
-                .isoformat(),
-                "values": {
-                    "temperature": 70,
-                    "precipitationProbability": 15,
-                    "cloudCover": 40,
-                },
-            },
-            {
-                "time": datetime.now(tz=timezone.utc)
-                .replace(hour=9, minute=0, second=0, microsecond=0)
-                .isoformat(),
-                "values": {
-                    "temperature": 72,
-                    "precipitationProbability": 10,
-                    "cloudCover": 20,
-                },
-            },
-            {
-                "time": datetime.now(tz=timezone.utc)
-                .replace(hour=13, minute=0, second=0, microsecond=0)
-                .isoformat(),
-                "values": {
-                    "temperature": 80,
-                    "precipitationProbability": 5,
-                    "cloudCover": 10,
-                },
-            },
-            {
-                "time": datetime.now(tz=timezone.utc)
-                .replace(hour=14, minute=0, second=0, microsecond=0)
-                .isoformat(),
-                "values": {
-                    "temperature": 84,
-                    "precipitationProbability": 5,
-                    "cloudCover": 5,
-                },
-            },
-            {
-                "time": datetime.now(tz=timezone.utc)
-                .replace(hour=18, minute=0, second=0, microsecond=0)
-                .isoformat(),
-                "values": {
-                    "temperature": 78,
-                    "precipitationProbability": 0,
-                    "cloudCover": 0,
-                },
-            },
-            {
-                "time": datetime.now(tz=timezone.utc)
-                .replace(hour=19, minute=0, second=0, microsecond=0)
-                .isoformat(),
-                "values": {
-                    "temperature": 76,
-                    "precipitationProbability": 0,
-                    "cloudCover": 0,
-                },
-            },
-        ]
+@pytest.fixture
+def sample_response():
+    """
+    This fixture creates a sample API response from tomorrow.io.
+    The timestamps are generated in UTC, but they are calculated to fall into
+    morning, afternoon, and evening slots when converted to the local timezone
+    where the tests are run. This makes the tests timezone-independent.
+    """
+    hourly_entries = []
+    local_tz = datetime.now().astimezone().tzinfo
+    local_now = datetime.now(local_tz)
+
+    # Define target hours in local time for different parts of the day
+    target_hours_map = {
+        "morning": [8, 9],
+        "afternoon": [13, 14],
+        "evening": [18, 19],
     }
-}
+
+    # Dummy data for weather values
+    weather_values = {
+        8: {"temperature": 70, "precipitationProbability": 15, "cloudCover": 40},
+        9: {"temperature": 72, "precipitationProbability": 10, "cloudCover": 20},
+        13: {"temperature": 80, "precipitationProbability": 5, "cloudCover": 10},
+        14: {"temperature": 84, "precipitationProbability": 5, "cloudCover": 5},
+        18: {"temperature": 78, "precipitationProbability": 0, "cloudCover": 0},
+        19: {"temperature": 76, "precipitationProbability": 0, "cloudCover": 0},
+    }
+
+    for _, hours in target_hours_map.items():
+        for hour in hours:
+            # Create a datetime for the target hour in the local timezone
+            target_local_time = local_now.replace(
+                hour=hour, minute=0, second=0, microsecond=0
+            )
+            # Convert this local time to UTC
+            target_utc_time = target_local_time.astimezone(timezone.utc)
+            hourly_entries.append(
+                {
+                    "time": target_utc_time.isoformat(),
+                    "values": weather_values[hour],
+                }
+            )
+
+    return {"timelines": {"hourly": hourly_entries}}
 
 
-def test_get_daily_summary_success(requests_mock):
-    requests_mock.get(MOCK_URL, json=SAMPLE_RESPONSE, status_code=200)
+def test_get_daily_summary_success(requests_mock, sample_response):
+    requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
     tool = TomorrowIoTool()
     summary = tool.get_daily_summary(MOCK_LOCATION)
     assert "Today's forecast -" in summary
