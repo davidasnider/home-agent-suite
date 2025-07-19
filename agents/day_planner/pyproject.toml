@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "day-planner-agent"
+version = "0.1.0"
+description = "Day Planner Agent"
+authors = ["David Snider <david@davidsnider.org>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+google-adk = "^0.1.0"
+python-dotenv = "^1.0.0"
+tomorrow-io-client = { path = "../../libs/tomorrow_io_client", develop = true }
+
+[tool.poetry-monorepo-dependency-plugin]
+enable = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

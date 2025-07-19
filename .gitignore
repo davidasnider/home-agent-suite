@@ -12,3 +12,6 @@ pycache/
 
 .pytest_cache/
 **/__pycache__/
+
+# Build artifacts
+**/*.egg-info/
