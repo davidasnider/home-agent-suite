@@ -6,6 +6,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Configuration settings for the Tomorrow.io weather API client.
+    
+    This class uses Pydantic's BaseSettings to automatically load configuration
+    from environment variables or .env files.
+    
+    Attributes:
+        tomorrow_io_api_key: API key for Tomorrow.io weather service
+        base_url: Base URL for the Tomorrow.io API endpoints
+    """
     tomorrow_io_api_key: str
     base_url: str = "https://api.tomorrow.io/v4/weather/forecast"
 
@@ -16,11 +25,48 @@ settings = Settings()  # type: ignore values come from .env or environment varia
 
 
 class TomorrowIoTool:
+    """A tool for fetching and processing weather data from Tomorrow.io API.
+    
+    This class provides methods to retrieve and format weather forecasts
+    for specified locations using the Tomorrow.io weather service.
+    """
+    
     def __init__(self):
+        """Initialize the TomorrowIoTool with configuration settings.
+        
+        Uses the pre-initialized, shared instance of the settings which
+        loads API keys and configuration from environment variables.
+        """
         # Use the pre-initialized, shared instance of the settings.
         self.settings = settings
 
     def get_daily_summary(self, location: str) -> str:
+        """Get a formatted daily weather summary for a specified location.
+        
+        Fetches hourly weather data from Tomorrow.io API and processes it into
+        a human-readable summary broken down by time periods (morning, afternoon, evening).
+        
+        Args:
+            location: The location to get weather for. Can be a city name, 
+                     coordinates, or any format supported by Tomorrow.io API
+                     (e.g., "40.7128,-74.0060", "London")
+        
+        Returns:
+            A formatted string containing today's weather forecast with average
+            temperature, precipitation probability, and cloud conditions for
+            morning (8am-12pm), afternoon (12pm-5pm), and evening (5pm-10pm).
+            
+        Raises:
+            requests.exceptions.HTTPError: If the API request fails
+            requests.exceptions.RequestException: For other request-related errors
+            
+        Example:
+            >>> tool = TomorrowIoTool()
+            >>> summary = tool.get_daily_summary("New York, NY")
+            >>> print(summary)
+            Today's forecast - Morning (8am-12pm): Avg 72F, 10% rain chance, partly cloudy. 
+            Afternoon (12pm-5pm): Avg 78F, 5% rain chance, sunny.
+        """
         params = {
             "location": location,
             "timesteps": "1h",
@@ -47,6 +93,19 @@ class TomorrowIoTool:
         evening_hours = range(17, 22)  # 5pm up to 10pm
 
         def summarize_period(hourly_data, hour_range):
+            """Summarize weather data for a specific time period.
+            
+            Processes hourly weather data to calculate average conditions
+            for a given range of hours in the current day.
+            
+            Args:
+                hourly_data: List of hourly weather data entries from API
+                hour_range: Range object specifying which hours to include
+                
+            Returns:
+                String summary of average conditions for the period, or None
+                if no data is available for the specified time range.
+            """
             temps = []
             prec_probs = []
             clouds = []
