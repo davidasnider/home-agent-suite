@@ -1,8 +1,12 @@
 from datetime import datetime, timezone
+import functools
+from typing import Any, Dict, List, Optional, Sequence, Type, TypedDict, Annotated
 
 import requests
 import tzlocal
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from google.adk.tools import BaseTool
 
 
 class Settings(BaseSettings):
@@ -18,26 +22,54 @@ class Settings(BaseSettings):
     tomorrow_io_api_key: str
     base_url: str = "https://api.tomorrow.io/v4/weather/forecast"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env", 
+        env_file_encoding="utf-8",
+        extra="ignore"  # Ignore extra fields in the .env file
+    )
 
 
 settings = Settings()  # type: ignore values come from .env or environment variables
 
 
-class TomorrowIoTool:
-    """A tool for fetching and processing weather data from Tomorrow.io API.
+class LocationInput(TypedDict):
+    """Input type for the weather tool."""
+    location: str
+
+
+class TomorrowIoWeatherTool(BaseTool):
+    """A tool for fetching and summarizing weather forecasts from Tomorrow.io API."""
+
+    input_type: Type[LocationInput] = LocationInput
     
-    This class provides methods to retrieve and format weather forecasts
-    for specified locations using the Tomorrow.io weather service.
+    def __init__(self):
+        """Initialize the weather tool."""
+        super().__init__(
+            name="get_weather_forecast",
+            description="Get a daily weather summary for a location. Provide a city name, zip code, or coordinates."
+        )
+        self._client = TomorrowIoClient()
+    
+    def __call__(self, location: str) -> str:
+        """Call the tool with the given location.
+        
+        Args:
+            location: The location to get weather for (e.g., "New York, NY", "zip:10001")
+            
+        Returns:
+            A formatted summary of today's weather forecast.
+        """
+        return self._client.get_daily_summary(location)
+
+class TomorrowIoClient:
+    """Client for the Tomorrow.io weather API.
+    
+    This class provides methods to fetch and process weather data,
+    separate from the ADK tool interface.
     """
     
     def __init__(self):
-        """Initialize the TomorrowIoTool with configuration settings.
-        
-        Uses the pre-initialized, shared instance of the settings which
-        loads API keys and configuration from environment variables.
-        """
-        # Use the pre-initialized, shared instance of the settings.
+        """Initialize the Tomorrow.io client."""
         self.settings = settings
 
     def get_daily_summary(self, location: str) -> str:
@@ -160,8 +192,8 @@ class TomorrowIoTool:
 # This block allows the file to be run directly for debugging against the live API.
 # It will not run when the module is imported by other code.
 if __name__ == "__main__":
-    print("--- Running TomorrowIoTool in Direct Debug Mode ---")
-    tool = TomorrowIoTool()
+    print("--- Running TomorrowIoClient in Direct Debug Mode ---")
+    tool = TomorrowIoClient()
     # Replace with any location you want to test live.
     test_location = "kalispell"
     print(f"Fetching weather summary for: {test_location}")
