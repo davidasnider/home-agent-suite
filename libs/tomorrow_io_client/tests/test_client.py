@@ -62,12 +62,16 @@ def sample_response():
 
 def test_get_tmrw_weather_tool_success(requests_mock, sample_response):
     requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
-    summary = get_tmrw_weather_tool(MOCK_LOCATION)
-    assert "Today's forecast -" in summary
-    assert "Morning" in summary
-    assert "Afternoon" in summary
-    assert "Evening" in summary
-    assert "Avg" in summary
+    result = get_tmrw_weather_tool(MOCK_LOCATION)
+    assert isinstance(result, dict)
+    assert result["status"] == "success"
+    assert result["location"] == MOCK_LOCATION
+    forecast = result["forecast"]
+    assert "Today's forecast -" in forecast
+    assert "Morning" in forecast
+    assert "Afternoon" in forecast
+    assert "Evening" in forecast
+    assert "Avg" in forecast
 
 
 def test_get_tmrw_weather_tool_api_error(requests_mock):
@@ -80,5 +84,9 @@ def test_get_tmrw_weather_tool_no_hourly_data(requests_mock):
     # API returns a valid response but with an empty hourly timeline
     empty_response = {"timelines": {"hourly": []}}
     requests_mock.get(MOCK_URL, json=empty_response, status_code=200)
-    summary = get_tmrw_weather_tool(MOCK_LOCATION)
-    assert summary == "No hourly weather data available."
+    result = get_tmrw_weather_tool(MOCK_LOCATION)
+    assert isinstance(result, dict)
+    assert result["status"] == "error"
+    assert result["location"] == MOCK_LOCATION
+    assert result["forecast"] is None
+    assert "No hourly weather data available." in result["error_message"]

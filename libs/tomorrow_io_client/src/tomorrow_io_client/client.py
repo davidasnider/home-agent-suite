@@ -17,16 +17,32 @@ class Settings(BaseSettings):
 settings = Settings()  # type: ignore values come from .env or environment variables
 
 
-def get_tmrw_weather_tool(location: str) -> str:
+def get_tmrw_weather_tool(location: str) -> dict:
     """
-    Get a formatted daily weather summary for a specified location using Tomorrow.io
-    API.
+    Get a daily weather summary for a specified location using Tomorrow.io API.
+
     Args:
-        location: The location to get weather for (city name, coordinates, etc.)
+        location (str): The location to get weather for (city name, coordinates, etc.)
+
     Returns:
-        A formatted string containing today's weather forecast with average
-        temperature, precipitation probability, and cloud conditions for
-        morning (8am-12pm), afternoon (12pm-5pm), and evening (5pm-10pm).
+        dict: A dictionary with keys:
+            - status (str): "success" or "error"
+            - forecast (str): Weather summary if successful, else None
+            - location (str): The location queried
+            - error_message (str, optional): Present if status is "error"
+
+    Example success:
+        {
+            "status": "success",
+            "forecast": "Today's forecast - Morning (8am-12pm): ...",
+            "location": "New York, NY"
+        }
+    Example error:
+        {
+            "status": "error",
+            "error_message": "No hourly weather data available.",
+            "location": "New York, NY"
+        }
     """
     params = {
         "location": location,
@@ -42,7 +58,12 @@ def get_tmrw_weather_tool(location: str) -> str:
     except (KeyError, TypeError):
         hours = []
     if not hours:
-        return "No hourly weather data available."
+        return {
+            "status": "error",
+            "error_message": "No hourly weather data available.",
+            "location": location,
+            "forecast": None,
+        }
 
     local_tz = tzlocal.get_localzone()
     today_local = datetime.now(local_tz).date()
@@ -93,9 +114,15 @@ def get_tmrw_weather_tool(location: str) -> str:
         summary_parts.append(f"Evening (5pm-10pm): {evening}")
 
     if not summary_parts:
-        return "No forecast data available for today."
+        return {
+            "status": "error",
+            "error_message": "No forecast data available for today.",
+            "location": location,
+            "forecast": None,
+        }
 
-    return "Today's forecast - " + ". ".join(summary_parts) + "."
+    forecast = "Today's forecast - " + ". ".join(summary_parts) + "."
+    return {"status": "success", "forecast": forecast, "location": location}
 
 
 # Debug block for direct execution
