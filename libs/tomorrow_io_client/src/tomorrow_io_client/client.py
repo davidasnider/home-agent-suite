@@ -1,24 +1,26 @@
-
 from datetime import datetime, timezone
 import requests
 import tzlocal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     """Configuration settings for the Tomorrow.io weather API client."""
+
     tomorrow_io_api_key: str
     base_url: str = "https://api.tomorrow.io/v4/weather/forecast"
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
 
 settings = Settings()  # type: ignore values come from .env or environment variables
 
+
 def get_tmrw_weather_tool(location: str) -> str:
     """
-    Get a formatted daily weather summary for a specified location using Tomorrow.io API.
+    Get a formatted daily weather summary for a specified location using Tomorrow.io
+    API.
     Args:
         location: The location to get weather for (city name, coordinates, etc.)
     Returns:

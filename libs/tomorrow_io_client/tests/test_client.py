@@ -1,4 +1,3 @@
-
 import pytest
 import requests
 from tomorrow_io_client.client import get_tmrw_weather_tool
