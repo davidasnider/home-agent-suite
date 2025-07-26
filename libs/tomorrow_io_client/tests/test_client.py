@@ -1,6 +1,7 @@
+
 import pytest
 import requests
-from tomorrow_io_client.client import TomorrowIoTool
+from tomorrow_io_client.client import get_tmrw_weather_tool
 from datetime import datetime, timezone
 
 MOCK_API_KEY = "test_api_key"
@@ -60,10 +61,9 @@ def sample_response():
     return {"timelines": {"hourly": hourly_entries}}
 
 
-def test_get_daily_summary_success(requests_mock, sample_response):
+def test_get_tmrw_weather_tool_success(requests_mock, sample_response):
     requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
-    tool = TomorrowIoTool()
-    summary = tool.get_daily_summary(MOCK_LOCATION)
+    summary = get_tmrw_weather_tool(MOCK_LOCATION)
     assert "Today's forecast -" in summary
     assert "Morning" in summary
     assert "Afternoon" in summary
@@ -71,17 +71,15 @@ def test_get_daily_summary_success(requests_mock, sample_response):
     assert "Avg" in summary
 
 
-def test_get_daily_summary_api_error(requests_mock):
+def test_get_tmrw_weather_tool_api_error(requests_mock):
     requests_mock.get(MOCK_URL, status_code=500)
-    tool = TomorrowIoTool()
     with pytest.raises(requests.exceptions.HTTPError):
-        tool.get_daily_summary(MOCK_LOCATION)
+        get_tmrw_weather_tool(MOCK_LOCATION)
 
 
-def test_get_daily_summary_no_hourly_data(requests_mock):
+def test_get_tmrw_weather_tool_no_hourly_data(requests_mock):
     # API returns a valid response but with an empty hourly timeline
     empty_response = {"timelines": {"hourly": []}}
     requests_mock.get(MOCK_URL, json=empty_response, status_code=200)
-    tool = TomorrowIoTool()
-    summary = tool.get_daily_summary(MOCK_LOCATION)
+    summary = get_tmrw_weather_tool(MOCK_LOCATION)
     assert summary == "No hourly weather data available."
