@@ -1,3 +1,13 @@
+# Logging
+
+All agents/tools should use the shared logging utility for consistent logging:
+
+```python
+from common_logging.logging_utils import setup_logging
+setup_logging(service_name="your_agent_name")
+```
+
+This ensures logs are formatted and routed consistently across the suite, whether running locally or in GCP.
 # Project Agent and Tool Manifest
 
 This document provides high-level context for the AI agents and tools within the `home-agent-suite` project. It is intended to ground GitHub CoPilot and assist human developers in understanding the system's architecture.

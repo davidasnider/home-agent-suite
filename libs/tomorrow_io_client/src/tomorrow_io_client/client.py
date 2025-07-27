@@ -2,6 +2,11 @@ from datetime import datetime, timezone
 import requests
 import tzlocal
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from common_logging.logging_utils import setup_logging
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -12,6 +17,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        logger.info("Initialized Tomorrow.io Settings with base_url=%s", self.base_url)
 
 
 settings = Settings()  # type: ignore values come from .env or environment variables
@@ -50,14 +59,27 @@ def get_tmrw_weather_tool(location: str) -> dict:
         "units": "imperial",
         "apikey": settings.tomorrow_io_api_key,
     }
-    response = requests.get(settings.base_url, params=params)
-    response.raise_for_status()
-    data = response.json()
+    try:
+        logger.info("Requesting weather summary for location: %s", location)
+        response = requests.get(settings.base_url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        logger.info("Received weather data response for location: %s", location)
+    except requests.RequestException as e:
+        logger.error("API request failed for location %s: %s", location, e)
+        return {
+            "status": "error",
+            "error_message": str(e),
+            "location": location,
+            "forecast": None,
+        }
     try:
         hours = data.get("timelines", {}).get("hourly", [])
     except (KeyError, TypeError):
         hours = []
+        logger.warning("Malformed response structure for location: %s", location)
     if not hours:
+        logger.warning("No hourly weather data available for location: %s", location)
         return {
             "status": "error",
             "error_message": "No hourly weather data available.",
@@ -72,6 +94,7 @@ def get_tmrw_weather_tool(location: str) -> dict:
     evening_hours = range(17, 22)
 
     def summarize_period(hourly_data, hour_range):
+        logger.info("Summarizing weather for location: %s", location)
         temps = []
         prec_probs = []
         clouds = []
@@ -104,6 +127,12 @@ def get_tmrw_weather_tool(location: str) -> dict:
     morning = summarize_period(hours, morning_hours)
     afternoon = summarize_period(hours, afternoon_hours)
     evening = summarize_period(hours, evening_hours)
+    logger.info(
+        "Summary parts: morning=%s, afternoon=%s, evening=%s",
+        morning[:40] if morning else None,
+        afternoon[:40] if afternoon else None,
+        evening[:40] if evening else None,
+    )
 
     summary_parts = []
     if morning:
@@ -114,6 +143,9 @@ def get_tmrw_weather_tool(location: str) -> dict:
         summary_parts.append(f"Evening (5pm-10pm): {evening}")
 
     if not summary_parts:
+        logger.warning(
+            "No forecast data available for today for location: %s", location
+        )
         return {
             "status": "error",
             "error_message": "No forecast data available for today.",
@@ -122,18 +154,20 @@ def get_tmrw_weather_tool(location: str) -> dict:
         }
 
     forecast = "Today's forecast - " + ". ".join(summary_parts) + "."
+    logger.info("Returning forecast for location %s: %s", location, forecast[:40])
     return {"status": "success", "forecast": forecast, "location": location}
 
 
 # Debug block for direct execution
 if __name__ == "__main__":
-    print("--- Running get_tmrw_weather_tool in Direct Debug Mode ---")
+    setup_logging(service_name="tomorrow_io_client")
+    logger.info("--- Running get_tmrw_weather_tool in Direct Debug Mode ---")
     test_location = "kalispell"
-    print(f"Fetching weather summary for: {test_location}")
+    logger.info(f"Fetching weather summary for: {test_location}")
     try:
         live_summary = get_tmrw_weather_tool(location=test_location)
-        print("\n--- Live API Weather Summary ---")
-        print(live_summary)
+        logger.info("--- Live API Weather Summary ---")
+        logger.info(live_summary)
     except requests.exceptions.RequestException as e:
-        print("\n--- An API error occurred ---")
-        print(f"Error: {e}")
+        logger.error("--- An API error occurred ---")
+        logger.error(f"Error: {e}")

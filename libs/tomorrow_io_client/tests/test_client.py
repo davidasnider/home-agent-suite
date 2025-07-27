@@ -1,5 +1,4 @@
 import pytest
-import requests
 from tomorrow_io_client.client import get_tmrw_weather_tool
 from datetime import datetime, timezone
 
@@ -76,8 +75,15 @@ def test_get_tmrw_weather_tool_success(requests_mock, sample_response):
 
 def test_get_tmrw_weather_tool_api_error(requests_mock):
     requests_mock.get(MOCK_URL, status_code=500)
-    with pytest.raises(requests.exceptions.HTTPError):
-        get_tmrw_weather_tool(MOCK_LOCATION)
+    result = get_tmrw_weather_tool(MOCK_LOCATION)
+    assert isinstance(result, dict)
+    assert result["status"] == "error"
+    assert result["location"] == MOCK_LOCATION
+    assert result["forecast"] is None
+    assert (
+        "API request failed" in result["error_message"]
+        or "500" in result["error_message"]
+    )
 
 
 def test_get_tmrw_weather_tool_no_hourly_data(requests_mock):
