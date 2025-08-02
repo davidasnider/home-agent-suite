@@ -1,3 +1,25 @@
+"""
+Common Logging Utilities Module
+
+This module provides centralized logging configuration for the home-agent-suite
+system, supporting both local development and Google Cloud Platform deployments.
+
+The logging system automatically detects the runtime environment and configures
+appropriate handlers, formatters, and log levels for optimal observability.
+
+Key Features:
+- Automatic cloud/local environment detection
+- Google Cloud Logging integration
+- Consistent log formatting across services
+- Structured logging for better searchability
+
+For MCP and agentic AI systems, this module:
+- Provides standardized logging interfaces
+- Enables distributed tracing capabilities
+- Supports audit trails for agent interactions
+- Facilitates debugging across service boundaries
+"""
+
 import logging
 import os
 
@@ -6,9 +28,43 @@ from typing import Optional
 
 def setup_logging(service_name: Optional[str] = None, cloud: Optional[bool] = None):
     """
-    Sets up logging for both local and GCP environments.
-    If running in GCP, attaches Cloud Logging handler.
-    Otherwise, logs to console in structured format.
+    Sets up centralized logging configuration for local and cloud environments.
+
+    This function automatically detects the runtime environment and configures
+    the appropriate logging handlers. In GCP environments, it integrates with
+    Cloud Logging for centralized log aggregation. In local environments,
+    it provides structured console logging.
+
+    Args:
+        service_name (Optional[str]): Name of the service for log identification.
+            Used for filtering and organizing logs in monitoring systems.
+        cloud (Optional[bool]): Force cloud or local mode. If None, auto-detects
+            based on GOOGLE_CLOUD_PROJECT environment variable.
+
+    Environment Detection:
+        - Cloud mode: GOOGLE_CLOUD_PROJECT environment variable is set
+        - Local mode: No GOOGLE_CLOUD_PROJECT detected
+
+    Cloud Configuration:
+        - Integrates with Google Cloud Logging API
+        - Automatically adds metadata (project, service, version)
+        - Supports structured JSON logging
+
+    Local Configuration:
+        - Console-based logging with timestamps
+        - Human-readable format for development
+        - Service name identification
+
+    Example Usage:
+        # Basic setup
+        setup_logging(service_name="my_agent")
+
+        # Force local mode for testing
+        setup_logging(service_name="test_agent", cloud=False)
+
+    For MCP Integration:
+        This function ensures consistent logging patterns across all agents,
+        enabling proper audit trails and debugging capabilities for agentic workflows.
     """
     # Detect environment
     if cloud is None:

@@ -1,3 +1,23 @@
+"""
+Day Planner Agent Instruction Prompt
+
+This module contains the structured instruction prompt for the Day Planner Agent.
+The prompt defines the agent's behavior, tool usage patterns, and response format
+to ensure consistent, weather-grounded planning recommendations.
+
+Design Principles:
+- Tool-first approach: All weather data must come from API calls
+- Location-aware: Handles various location input formats
+- Time-specific: Provides precise activity time windows
+- Practical: Focuses on actionable recommendations
+
+For MCP and agentic AI systems, this prompt:
+- Enforces mandatory tool usage patterns
+- Provides structured decision trees
+- Ensures deterministic behavior
+- Enables consistent multi-turn conversations
+"""
+
 instruction = """
 You are a day planning assistant that provides recommendations based on local
 weather conditions.

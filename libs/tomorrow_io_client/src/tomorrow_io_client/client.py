@@ -1,3 +1,33 @@
+"""
+Tomorrow.io Weather API Client Module
+
+This module provides a robust, production-ready client for the Tomorrow.io weather API,
+specifically designed for integration with Google ADK agents and MCP systems.
+
+The client handles API authentication, request formatting, response parsing, and
+error handling while providing a simplified interface optimized for AI agent
+consumption.
+
+Key Features:
+- Structured weather data retrieval
+- Intelligent response summarization for LLM consumption
+- Comprehensive error handling and logging
+- Local timezone awareness
+- Production-ready configuration management
+
+API Integration:
+- Tomorrow.io Forecast API v4
+- Hourly weather data with 7-day forecasts
+- Imperial units (Fahrenheit, miles, etc.)
+- Location flexibility (city names, coordinates, zip codes)
+
+For MCP and agentic AI systems, this client:
+- Provides deterministic, structured responses
+- Optimizes token usage with intelligent summarization
+- Enables reliable weather-based decision making
+- Supports conversational context with location memory
+"""
+
 from datetime import datetime, timezone
 import requests
 import tzlocal
