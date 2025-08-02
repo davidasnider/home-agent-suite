@@ -37,6 +37,17 @@ poetry run flake8 .
 pre-commit run --all-files
 ```
 
+### Infrastructure Management
+```bash
+# GitHub repository settings (branch protection, etc.)
+cd infrastructure/github
+poetry install
+pulumi stack init dev  # First time only
+pulumi config set github:owner davidasnider
+pulumi config set --secret github:token YOUR_GITHUB_TOKEN
+pulumi up
+```
+
 ### Per-Agent Development
 ```bash
 # Work on specific agent (e.g., day_planner)
@@ -68,6 +79,25 @@ python -m tomorrow_io_client.client
 - **Common Logging** (`libs/common_logging/`) - Unified logging setup for local and GCP environments
 
 ## Code Conventions
+
+### Dependency Management
+**CRITICAL**: Always use Poetry for all dependency management across the entire project:
+- ✅ **Use Poetry**: All components use `pyproject.toml` with Poetry
+- ❌ **Never use pip/requirements.txt**: Inconsistent with project standards
+- ✅ **Path dependencies**: Use local path dependencies for monorepo components
+- ✅ **Separate pyproject.toml**: Each agent/library/infrastructure component has its own
+
+Examples:
+```bash
+# Correct: Add new dependency with Poetry
+poetry add requests
+
+# Correct: Add development dependency
+poetry add --group dev pytest
+
+# Wrong: Never use pip or requirements.txt
+pip install requests  # ❌ DON'T DO THIS
+```
 
 ### Logging Setup
 All agents and tools must initialize logging using the shared utility:

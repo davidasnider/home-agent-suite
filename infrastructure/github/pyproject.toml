@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "github-infrastructure"
+version = "0.1.0"
+description = "GitHub repository management infrastructure using Pulumi"
+authors = ["David Snider <david@davidsnider.org>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pulumi = "^3.0.0"
+pulumi-github = "^6.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

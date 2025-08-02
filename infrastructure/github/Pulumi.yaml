@@ -1,0 +1,18 @@
+name: github-management
+runtime: python
+description: |
+  GitHub repository management infrastructure for home-agent-suite.
+
+  This Pulumi project manages GitHub repository settings including:
+  - Branch protection rules
+  - Repository configuration
+  - Team permissions and access controls
+
+template:
+  config:
+    github:owner:
+      description: GitHub organization or user name
+      default: davidasnider
+    github:token:
+      description: GitHub personal access token
+      secret: true
