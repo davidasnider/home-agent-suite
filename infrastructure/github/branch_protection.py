@@ -41,7 +41,7 @@ class BranchProtectionConfig:
         self.allow_review_dismissals = config.get_bool("allow_review_dismissals", True)
 
         # Push restrictions
-        self.restrict_pushes = config.get_bool("restrict_pushes", True)
+        self.restrict_pushes = config.get_object("restrict_pushes", [])
         self.allow_force_pushes = config.get_bool("allow_force_pushes", False)
         self.allow_deletions = config.get_bool("allow_deletions", False)
 

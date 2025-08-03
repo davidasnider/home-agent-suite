@@ -2,16 +2,17 @@ config:
   github:owner: davidasnider
   github-management:repository_name: home-agent-suite
   github-management:protected_branch: main
-  github-management:required_reviews: 1
-  github-management:dismiss_stale_reviews: true
-  github-management:require_code_owner_reviews: false
-  github-management:allow_review_dismissals: true
-  github-management:restrict_pushes: true
-  github-management:allow_force_pushes: false
-  github-management:allow_deletions: false
-  github-management:require_status_checks: true
-  github-management:require_up_to_date: true
-  github-management:enforce_admins: false
+  github-management:required_reviews: "1"
+  github-management:dismiss_stale_reviews: "true"
+  github-management:require_code_owner_reviews: "false"
+  github-management:allow_review_dismissals: "true"
+  github-management:restrict_pushes: []
+  github-management:allow_force_pushes: "false"
+  github-management:allow_deletions: "false"
+  github-management:require_status_checks: "true"
+  github-management:require_up_to_date: "true"
+  github-management:enforce_admins: "false"
   github-management:status_check_contexts:
     - "ci/quality-checks"
     - "ci/tests"
+  github-management:delete_branch_on_merge: "true"

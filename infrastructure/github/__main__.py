@@ -21,6 +21,7 @@ Usage:
 
 import pulumi
 from branch_protection import BranchProtectionConfig, setup_repository_settings
+from repository_settings import RepositorySettingsConfig, create_repository_settings
 
 
 def main():
@@ -32,24 +33,29 @@ def main():
     """
 
     # Initialize configuration
-    config = BranchProtectionConfig()
+    bp_config = BranchProtectionConfig()
+    repo_config = RepositorySettingsConfig()
+
+    # Create repository with settings
+    repository = create_repository_settings(repo_config)
 
     # Setup repository governance
     resources = setup_repository_settings(
-        repository_name=config.repository_name, config=config
+        repository_name=bp_config.repository_name, config=bp_config
     )
 
     # Export important resource information
     pulumi.export("repository_name", resources["repository_name"])
     pulumi.export("protected_branch", resources["protected_branch"])
     pulumi.export("branch_protection_id", resources["branch_protection"].id)
+    pulumi.export("repository_id", repository.id)
 
     # Export branch protection details for reference
     pulumi.export(
         "branch_protection_url",
         resources["branch_protection"].id.apply(
             lambda id: (
-                f"https://github.com/{config.repository_name}/"
+                f"https://github.com/{bp_config.repository_name}/"
                 f"settings/branch_protection_rules/{id}"
             )
         ),
