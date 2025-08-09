@@ -43,6 +43,8 @@ jobs:
             echo "Running tests in $project_dir"
             cd "$project_dir"
             poetry install  # Install dependencies for this library
+            # Set fake environment variables for testing (no real secrets)
+            export TOMORROW_IO_API_KEY="fake_api_key_for_testing"
             poetry run pytest
             cd - > /dev/null
           done
