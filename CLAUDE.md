@@ -17,6 +17,22 @@ This is a monorepo for a multi-agent home intelligence system built with Google 
 - **Tool-based Architecture**: Agents use custom tools to interact with external APIs (Tomorrow.io weather, Home Assistant)
 - **Hierarchical Agents**: A supervisor agent delegates tasks to specialized sub-agents
 
+## Development Workflow
+
+### Starting Any Development Session
+**CRITICAL**: Always follow this workflow when starting work:
+
+**If starting from main branch:**
+1. **Pull latest changes**: `git pull origin main`
+2. **Run tests**: `poetry run pytest` to ensure everything works
+3. **Create feature branch**: `git checkout -b descriptive-branch-name`
+
+**If on an existing feature branch:**
+1. **Run tests**: `poetry run pytest` to ensure everything works
+2. **Continue on current branch** (no need to create new branch)
+
+This ensures you're working with the latest code and all tests pass before making changes.
+
 ## Development Commands
 
 ### Core Commands
