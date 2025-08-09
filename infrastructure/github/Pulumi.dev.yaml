@@ -11,7 +11,7 @@ config:
   github-management:allow_deletions: "false"
   github-management:require_status_checks: "true"
   github-management:require_up_to_date: "true"
-  github-management:enforce_admins: "false"
+  github-management:enforce_admins: "true"
   github-management:status_check_contexts:
     - "ci/quality-checks"
     - "ci/tests"
