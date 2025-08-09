@@ -36,4 +36,15 @@ jobs:
       - name: Lint with Flake8
         run: poetry run flake8 .
       - name: Run Unit Tests
-        run: poetry run pytest
+        run: |
+          # Run tests in each library/agent directory that has tests
+          for test_dir in $(find . -name "tests" -type d | grep -E "(libs|agents)"); do
+            project_dir=$(dirname "$test_dir")
+            echo "Running tests in $project_dir"
+            cd "$project_dir"
+            poetry install  # Install dependencies for this library
+            # Set fake environment variables for testing (no real secrets)
+            export TOMORROW_IO_API_KEY="fake_api_key_for_testing"
+            poetry run pytest
+            cd - > /dev/null
+          done
