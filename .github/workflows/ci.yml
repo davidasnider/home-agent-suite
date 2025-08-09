@@ -38,4 +38,6 @@ jobs:
       - name: Lint with Flake8
         run: poetry run flake8 .
       - name: Run Unit Tests
-        run: poetry run pytest
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:$(find ./libs -name 'src' -type d | tr '\n' ':' | sed 's/:$//')"
+          poetry run pytest
