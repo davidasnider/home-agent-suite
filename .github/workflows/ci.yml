@@ -26,18 +26,22 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies for all projects
-        run: |
-          # Install root dependencies first (contains black, flake8, pytest)
-          poetry install --no-interaction
-          # Install dependencies for all sub-projects to ensure path dependencies are available
-          find . -path "./agents/*" -name pyproject.toml -execdir poetry install --no-interaction \;
-          find . -path "./libs/*" -name pyproject.toml -execdir poetry install --no-interaction \;
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      - name: Install project packages
+        run: poetry install --no-interaction
       - name: Check Formatting with Black
         run: poetry run black . --check
       - name: Lint with Flake8
         run: poetry run flake8 .
       - name: Run Unit Tests
         run: |
-          export PYTHONPATH="${PYTHONPATH}:$(find ./libs -name 'src' -type d | tr '\n' ':' | sed 's/:$//')"
-          poetry run pytest
+          # Run tests in each library/agent directory that has tests
+          for test_dir in $(find . -name "tests" -type d | grep -E "(libs|agents)"); do
+            project_dir=$(dirname "$test_dir")
+            echo "Running tests in $project_dir"
+            cd "$project_dir"
+            poetry run pytest
+            cd - > /dev/null
+          done
