@@ -28,7 +28,11 @@ jobs:
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies for all projects
         run: |
-          find . -name pyproject.toml -execdir poetry install --no-interaction \;
+          # Install root dependencies first (contains black, flake8, pytest)
+          poetry install --no-interaction
+          # Install dependencies for all sub-projects to ensure path dependencies are available
+          find . -path "./agents/*" -name pyproject.toml -execdir poetry install --no-interaction \;
+          find . -path "./libs/*" -name pyproject.toml -execdir poetry install --no-interaction \;
       - name: Check Formatting with Black
         run: poetry run black . --check
       - name: Lint with Flake8
