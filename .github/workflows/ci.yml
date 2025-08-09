@@ -42,6 +42,7 @@ jobs:
             project_dir=$(dirname "$test_dir")
             echo "Running tests in $project_dir"
             cd "$project_dir"
+            poetry install  # Install dependencies for this library
             poetry run pytest
             cd - > /dev/null
           done
