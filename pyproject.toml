@@ -12,6 +12,10 @@ python = "^3.11"
 tzlocal = "^5.3.1"
 pulumi = "^3.187.0"
 pulumi-github = "^6.7.3"
+streamlit = "^1.48.0"
+google-adk = "^1.10.0"
+python-dotenv = "^1.1.1"
+tomorrow-io-client = {path = "libs/tomorrow_io_client", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.0"
