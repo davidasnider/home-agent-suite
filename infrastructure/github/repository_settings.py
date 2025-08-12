@@ -7,6 +7,7 @@ class RepositorySettingsConfig:
         config = pulumi.Config()
         self.repository_name = config.get("repository_name", "home-agent-suite")
         self.delete_branch_on_merge = config.get_bool("delete_branch_on_merge", True)
+        self.has_issues = config.get_bool("has_issues", True)
 
 
 def create_repository_settings(config: RepositorySettingsConfig) -> github.Repository:
@@ -14,6 +15,7 @@ def create_repository_settings(config: RepositorySettingsConfig) -> github.Repos
         config.repository_name,
         name=config.repository_name,
         delete_branch_on_merge=config.delete_branch_on_merge,
+        has_issues=config.has_issues,
         opts=pulumi.ResourceOptions(import_=config.repository_name),
     )
     return repo
