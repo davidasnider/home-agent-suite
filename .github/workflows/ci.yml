@@ -76,7 +76,7 @@ jobs:
     if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.actor == 'davidasnider'
     steps:
       - name: Auto merge PR
-        uses: pascalgn/merge-action@v0.22.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          merge_method: squash
+        uses: pascalgn/automerge-action@v0.16.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: squash
