@@ -162,6 +162,17 @@ tomorrow-io-client = { path = "../../libs/tomorrow_io_client", develop = true }
 - All components should have unit tests
 - Mock external API calls in tests
 
+## Todo Management
+**IMPORTANT**: Use GitHub Issues exclusively for todo tracking and task management.
+
+- When asked to record a todo, create a GitHub Issue with appropriate labels and details
+- Include relevant code references, file paths, and context in issue descriptions
+- Use labels to categorize: `bug`, `enhancement`, `documentation`, `technical-debt`, etc.
+- Link related issues and PRs when relevant
+- Close issues when tasks are completed
+
+**Never use**: Markdown files, local notes, or other todo systems - GitHub Issues only.
+
 ### Code Style and Linting Standards
 **CRITICAL**: Always write code that follows these standards from the start to avoid extensive cleanup:
 
