@@ -4,6 +4,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  pull_request_target:
+    branches: [ "main" ]
 
 jobs:
   quality:
@@ -53,7 +55,7 @@ jobs:
     name: Auto Approve PR
     runs-on: ubuntu-latest
     needs: quality
-    if: github.event_name == 'pull_request' && github.actor == 'davidasnider'
+    if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.actor == 'davidasnider'
     steps:
       - name: Auto approve PR
         uses: hmarr/auto-approve-action@v4
@@ -65,7 +67,7 @@ jobs:
     name: Auto Merge PR
     runs-on: ubuntu-latest
     needs: auto-approve
-    if: github.event_name == 'pull_request' && github.actor == 'davidasnider'
+    if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.actor == 'davidasnider'
     steps:
       - name: Auto merge PR
         uses: pascalgn/merge-action@v0.22.2
