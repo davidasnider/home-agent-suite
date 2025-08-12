@@ -19,14 +19,11 @@ import time
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Any, Optional
-import asyncio
-from io import StringIO
-import os
 
 # Load environment variables
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass
@@ -34,6 +31,7 @@ except ImportError:
 # Import existing agents with error handling
 try:
     from agents.day_planner.agent import create_day_planner_agent
+
     DAY_PLANNER_AVAILABLE = True
 except Exception as e:
     DAY_PLANNER_AVAILABLE = False
@@ -41,6 +39,7 @@ except Exception as e:
 
 try:
     from agents.google_search_agent.agent import create_google_search_agent
+
     GOOGLE_SEARCH_AVAILABLE = True
 except Exception as e:
     GOOGLE_SEARCH_AVAILABLE = False
@@ -50,7 +49,7 @@ from common_logging.logging_utils import setup_logging
 
 # Initialize logging
 setup_logging(service_name="streamlit_chatbot")
-logger = logging.getLogger(__name__) # TODO don't use __name__ give it a better name
+logger = logging.getLogger(__name__)  # TODO don't use __name__ give it a better name
 logger.setLevel(logging.DEBUG)  # Enable debug logging for detailed agent info
 
 # Page configuration
@@ -62,14 +61,18 @@ st.set_page_config(
     menu_items={
         "Get Help": "https://github.com/davidasnider/home-agent-suite",
         "Report a bug": "https://github.com/davidasnider/home-agent-suite/issues",
-        "About": "Home Agent Suite - Intelligent home automation and planning assistant"
-    }
+        "About": (
+            "Home Agent Suite - Intelligent home automation and planning" " assistant"
+        ),
+    },
 )
+
 
 # Custom CSS for enhanced styling
 def load_custom_css():
     """Load custom CSS for enhanced styling"""
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     /* Main chat container styling */
     .stChatMessage {
@@ -79,33 +82,33 @@ def load_custom_css():
         padding: 15px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    
+
     /* User message styling */
     .stChatMessage[data-testid="user-message"] {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         margin-left: 20px;
     }
-    
+
     /* Assistant message styling */
     .stChatMessage[data-testid="assistant-message"] {
         background: var(--secondary-background-color);
         border-left: 4px solid #00d4aa;
         margin-right: 20px;
     }
-    
+
     /* Sidebar styling */
     .css-1d391kg {
         background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
     }
-    
+
     /* Chat input styling */
     .stChatInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #00d4aa;
         padding: 12px 20px;
     }
-    
+
     /* Button styling */
     .stButton > button {
         border-radius: 20px;
@@ -115,12 +118,12 @@ def load_custom_css():
         font-weight: 600;
         transition: all 0.3s ease;
     }
-    
+
     .stButton > button:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0,212,170,0.3);
     }
-    
+
     /* Typing indicator */
     .typing-indicator {
         display: flex;
@@ -130,12 +133,12 @@ def load_custom_css():
         border-radius: 15px;
         margin: 10px 0;
     }
-    
+
     .typing-dots {
         display: flex;
         gap: 4px;
     }
-    
+
     .typing-dots span {
         width: 8px;
         height: 8px;
@@ -143,40 +146,51 @@ def load_custom_css():
         background: #00d4aa;
         animation: typing 1.4s infinite;
     }
-    
+
     .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
     .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-    
+
     @keyframes typing {
         0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
         30% { transform: translateY(-10px); opacity: 1; }
     }
-    
+
     /* Mobile responsive adjustments */
     @media (max-width: 768px) {
         .stChatMessage {
             margin: 5px 0;
             padding: 12px;
         }
-        
+
         .stChatMessage[data-testid="user-message"] {
             margin-left: 10px;
         }
-        
+
         .stChatMessage[data-testid="assistant-message"] {
             margin-right: 10px;
         }
     }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 class ChatbotManager:
     """Manages chatbot agents and conversation state"""
-    
+
     def __init__(self):
         self.agents = {}
         self.runners = {}  # Store runners to maintain session state
-        
+
+        # Create a shared session service for all runners to ensure session persistence
+        from google.adk.sessions.in_memory_session_service import InMemorySessionService
+
+        self.shared_session_service = InMemorySessionService()
+        logger.debug(
+            f"🗃️ Created shared session service: {id(self.shared_session_service)}"
+        )
+
         # Initialize available agents
         if DAY_PLANNER_AVAILABLE:
             try:
@@ -186,7 +200,7 @@ class ChatbotManager:
                 logger.error(f"Failed to initialize day planner agent: {e}")
         else:
             logger.warning(f"Day planner agent not available: {day_planner_error}")
-            
+
         if GOOGLE_SEARCH_AVAILABLE:
             try:
                 self.agents["google_search"] = create_google_search_agent()
@@ -195,238 +209,356 @@ class ChatbotManager:
                 logger.error(f"Failed to initialize Google search agent: {e}")
         else:
             logger.warning(f"Google search agent not available: {google_search_error}")
-        
+
         # Add mock agent if no real agents are available
         if not self.agents:
             self.agents["demo"] = self._create_demo_agent()
             logger.info("No real agents available, using demo agent")
-            
+
         logger.info("Chatbot manager initialized with %d agents", len(self.agents))
-    
+
     def _create_demo_agent(self):
         """Create a demo agent for when real agents aren't available"""
+
         class DemoAgent:
             def __init__(self):
                 self.name = "Demo Agent"
-            
+
             def chat(self, message):
-                return f"🤖 Demo Agent Response: I received your message '{message}'. This is a demonstration of the chat interface. Real agent integration requires proper API keys and configuration."
-        
+                return (
+                    f"🤖 Demo Agent Response: I received your message "
+                    f"'{message}'. This is a demonstration of the chat "
+                    "interface. Real agent integration requires proper API "
+                    "keys and configuration."
+                )
+
         return DemoAgent()
-    
+
     def get_agent_response(self, agent_name: str, message: str) -> str:
         """Get response from specified agent"""
         try:
             if agent_name not in self.agents:
-                return f"❌ Agent '{agent_name}' not found. Available agents: {', '.join(self.agents.keys())}"
-            
+                return (
+                    f"❌ Agent '{agent_name}' not found. Available agents: "
+                    f"{', '.join(self.agents.keys())}"
+                )
+
             agent = self.agents[agent_name]
-            
+
             # Call the actual Google ADK agent
             try:
                 # Debug: Log available methods on the agent
-                logger.debug(f"Agent {agent_name} methods: {[method for method in dir(agent) if not method.startswith('_')]}")
-                
-                # Try Google ADK agent invocation with proper Runner (proper way)
+                agent_methods = [
+                    method for method in dir(agent) if not method.startswith("_")
+                ]
+                logger.debug(f"Agent {agent_name} methods: {agent_methods}")
+
+                # Use InMemoryRunner with proper run_async call like ADK web does
                 from google.adk.runners import InMemoryRunner
                 from google.genai import types
-                
-                # Get or create a persistent runner for this agent
+                import asyncio
+
+                # Get or create a persistent runner for this agent with shared
+                # session service
                 if agent_name not in self.runners:
                     try:
-                        # Use agent name as app_name to match adk web behavior
+                        # Create runner - InMemoryRunner manages its own session service
                         self.runners[agent_name] = InMemoryRunner(
-                            agent=agent,
-                            app_name=agent_name
+                            agent=agent, app_name=agent_name
                         )
-                        logger.debug(f"Created new InMemoryRunner for {agent_name}")
+
+                        # Override the session service to use our shared one for
+                        # session persistence
+                        self.runners[agent_name].session_service = (
+                            self.shared_session_service
+                        )
+                        logger.debug(
+                            f"Created new InMemoryRunner for {agent_name} and "
+                            "set shared session service"
+                        )
                     except Exception as runner_error:
-                        logger.debug(f"Failed to create Runner: {runner_error}, trying direct agent calls")
-                        use_runner = False
-                        runner = None
-                    else:
-                        use_runner = True
-                        runner = self.runners[agent_name]
-                else:
-                    logger.debug(f"Using existing InMemoryRunner for {agent_name}")
-                    use_runner = True
-                    runner = self.runners[agent_name]
-                
-                if use_runner:
-                    # Use the Runner with proper ADK Content object
+                        logger.error(f"Failed to create Runner: {runner_error}")
+                        raise Exception(
+                            f"Failed to create ADK Runner for agent {agent_name}"
+                        )
+
+                runner = self.runners[agent_name]
+
+                logger.debug("🔧 USING INMEMORY RUNNER - Following ADK web pattern")
+                logger.debug(
+                    f"🔧 Runner instance ID: {id(runner)} "
+                    "(same instance = session persistence)"
+                )
+                shared_id = id(self.shared_session_service)
+                logger.debug(
+                    f"🔧 Session service ID: {id(runner.session_service)} "
+                    f"(should be same as shared: {shared_id})"
+                )
+                logger.debug(f"🔧 Message: {message}")
+                logger.debug(f"🔧 Agent: {agent.name}")
+
+                try:
+                    # Create the content for the user message exactly like ADK web does
+                    user_content = types.Content(
+                        parts=[types.Part.from_text(text=message)], role="user"
+                    )
+
+                    logger.debug(f"🔧 Created user content: {user_content}")
+
+                    # Use consistent session ID from Streamlit session state
+                    # (with fallback for testing)
+                    user_id = "streamlit_user"
                     try:
-                        # Create proper Content object for the message
-                        content = types.Content(parts=[types.Part.from_text(text=message)])
-                        logger.debug(f"Created Content object: {content}")
-                        
-                        # Use consistent session ID from Streamlit session state (with fallback for testing)
-                        user_id = "streamlit_user"
+                        session_id = (
+                            st.session_state.conversation_id
+                        )  # Use existing conversation ID
+                        logger.info(
+                            f"🔑 Using existing conversation_id from "
+                            f"Streamlit session: {session_id}"
+                        )
+                    except AttributeError:
+                        # Fallback for non-Streamlit contexts (testing)
+                        session_id = "test_session"
+                        logger.info(f"🔑 Fallback session_id for testing: {session_id}")
+
+                    logger.debug(f"Using session_id: {session_id}, user_id: {user_id}")
+
+                    # Also log the app name to ensure consistency
+                    logger.debug(f"Using app_name: {agent_name} for agent session")
+
+                    async def run_agent():
+                        """Async wrapper for runner call - exactly like ADK web"""
+                        logger.debug("🚀 CALLING RUNNER.RUN_ASYNC like ADK web")
+
+                        # Check if session exists first, create only if needed
+                        existing_session = None
                         try:
-                            session_id = st.session_state.conversation_id  # Use existing conversation ID
-                        except AttributeError:
-                            # Fallback for non-Streamlit contexts (testing)
-                            session_id = "test_session"
-                        
-                        logger.debug(f"Using session_id: {session_id}, user_id: {user_id}")
-                        
-                        # DEBUG: Log agent configuration before runner invocation
-                        logger.debug(f"🔍 RUNNER DEBUG - Agent name: {agent.name}")
-                        logger.debug(f"🔍 RUNNER DEBUG - Agent model: {agent.model}")
-                        logger.debug(f"🔍 RUNNER DEBUG - Agent tools count: {len(agent.tools)}")
-                        logger.debug(f"🔍 RUNNER DEBUG - Agent instruction preview: {agent.instruction[:200]}...")
-                        for i, tool in enumerate(agent.tools):
-                            tool_name = getattr(tool, '__name__', str(tool))
-                            logger.debug(f"🔍 RUNNER DEBUG - Tool {i}: {tool_name} - {tool}")
-                        
-                        # Create session if it doesn't exist
-                        try:
-                            existing_session = runner.session_service.get_session_sync(
-                                app_name=agent_name,
-                                user_id=user_id, 
-                                session_id=session_id
-                            )
-                            logger.debug(f"🔍 Using existing session: {session_id} with {len(existing_session.events)} events")
-                            # DEBUG: Log session history
-                            for i, event in enumerate(existing_session.events):
-                                if hasattr(event, 'content') and event.content:
-                                    content_preview = str(event.content)[:100] if event.content else "None"
-                                    logger.debug(f"🔍 Session event {i}: {content_preview}...")
-                        except Exception as e:
-                            # Session doesn't exist, create it
-                            logger.debug(f"🔍 Creating new session: {session_id} (error: {e})")
-                            runner.session_service.create_session_sync(
-                                app_name=agent_name,
-                                user_id=user_id, 
-                                session_id=session_id
-                            )
-                        
-                        # DEBUG: Check session state before calling runner
-                        try:
-                            current_session = runner.session_service.get_session_sync(
+                            logger.debug(f"🔍 Checking if session exists: {session_id}")
+                            existing_session = await runner.session_service.get_session(
                                 app_name=agent_name,
                                 user_id=user_id,
-                                session_id=session_id
+                                session_id=session_id,
                             )
-                            logger.info(f"🔍 BEFORE RUNNER CALL - Session has {len(current_session.events)} events")
-                            for i, event in enumerate(current_session.events):
-                                if hasattr(event, 'content') and event.content:
+                            num_events = len(existing_session.events)
+                            logger.debug(
+                                f"✅ Found existing session: {session_id} "
+                                f"with {num_events} events"
+                            )
+                        except Exception as get_error:
+                            logger.debug(
+                                "🔍 Session doesn't exist, creating new one: "
+                                f"{get_error}"
+                            )
+                            try:
+                                await runner.session_service.create_session(
+                                    app_name=agent_name,
+                                    user_id=user_id,
+                                    session_id=session_id,
+                                )
+                                logger.debug(f"✅ Session created: {session_id}")
+
+                                # Get the newly created session
+                                existing_session = (
+                                    await runner.session_service.get_session(
+                                        app_name=agent_name,
+                                        user_id=user_id,
+                                        session_id=session_id,
+                                    )
+                                )
+                            except Exception as create_error:
+                                logger.error(
+                                    f"❌ Failed to create session: {create_error}"
+                                )
+                                raise create_error
+
+                        # Log session history for debugging
+                        if existing_session and existing_session.events:
+                            num_events = len(existing_session.events)
+                            logger.debug(
+                                f"📜 Session history summary ({num_events} "
+                                "total events):"
+                            )
+                            for i, event in enumerate(
+                                existing_session.events[-5:]
+                            ):  # Show last 5 events
+                                if hasattr(event, "content") and event.content:
                                     content_preview = str(event.content)[:100]
-                                    logger.info(f"🔍 Pre-run Event {i}: {content_preview}...")
-                        except Exception as e:
-                            logger.info(f"🔍 Could not get session before run: {e}")
-                        
-                        # DEBUG: Log just before runner.run()
-                        logger.debug(f"🚀 ABOUT TO CALL RUNNER.RUN")
-                        logger.debug(f"🚀 Message being sent: {message}")
-                        logger.debug(f"🚀 Content object: {content}")
-                        
-                        # Use regular runner.run() - synchronous method like adk web uses
+                                    logger.debug(f"📜 Event {i}: {content_preview}...")
+                                else:
+                                    event_str = str(event)[:100]
+                                    logger.debug(
+                                        f"📜 Event {i}: {type(event)} - "
+                                        f"{event_str}..."
+                                    )
+                        else:
+                            logger.debug(
+                                "📜 Session history is empty or session is None"
+                            )
+
                         responses = []
                         event_count = 0
-                        for event in runner.run(
+
+                        # Import RunConfig and StreamingMode exactly like ADK web
+                        from google.adk.agents.run_config import (
+                            RunConfig,
+                            StreamingMode,
+                        )
+
+                        # Call runner.run_async exactly like ADK web does in
+                        # /run_sse endpoint
+                        async for event in runner.run_async(
                             user_id=user_id,
                             session_id=session_id,
-                            new_message=content
+                            new_message=user_content,  # Key - pass the Content
+                            state_delta=None,  # No state delta for simple case
+                            run_config=RunConfig(
+                                streaming_mode=StreamingMode.NONE
+                            ),  # Like ADK web
                         ):
                             event_count += 1
-                            logger.debug(f"🎯 RUNNER EVENT {event_count}: {type(event)}")
-                            self._process_event(event, responses)
-                        
-                        logger.debug(f"🎯 RUNNER COMPLETED - Total events: {event_count}, Responses: {len(responses)}")
-                        response = '\n'.join(responses) if responses else "No response from agent"
-                        
-                    except Exception as e:
-                        logger.error(f"Error in runner.run: {e}")
-                        raise
-                    
-                else:
-                    # If Runner creation failed, show an informative error
-                    logger.error(f"Could not create InMemoryRunner for {agent_name}")
-                    raise Exception(f"Failed to create ADK Runner for agent {agent_name}. This is required for proper agent execution.")
-                    
+                            logger.debug(
+                                f"🎯 RUNNER ASYNC EVENT {event_count}: {type(event)}"
+                            )
+                            await self._process_event_async(event, responses)
+
+                        return responses, event_count
+
+                    # Run the async call
+                    try:
+                        loop = asyncio.get_event_loop()
+                    except RuntimeError:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+
+                    responses, event_count = loop.run_until_complete(run_agent())
+
+                    logger.debug(
+                        f"🎯 RUNNER ASYNC COMPLETED - Total events: "
+                        f"{event_count}, Responses: {len(responses)}"
+                    )
+                    response = (
+                        "\n".join(responses) if responses else "No response from agent"
+                    )
+
+                except Exception as e:
+                    logger.error(f"Error in runner async call: {e}")
+                    raise
+
                 logger.info(f"Successfully generated response from {agent_name} agent")
                 return str(response)
-                
+
             except Exception as agent_error:
-                logger.error(f"Agent call failed for {agent_name}: {str(agent_error)}")
+                error_msg = str(agent_error)
+                logger.error(f"Agent call failed for {agent_name}: {error_msg}")
                 logger.debug(f"Agent {agent_name} type: {type(agent)}")
-                logger.debug(f"Agent {agent_name} available methods: {[attr for attr in dir(agent) if not attr.startswith('_')]}")
-                
+                available_attrs = [
+                    attr for attr in dir(agent) if not attr.startswith("_")
+                ]
+                logger.debug(f"Agent {agent_name} available methods: {available_attrs}")
+
                 # Fallback response when agent integration isn't available
                 ellipsis = "..." if len(message) > 50 else ""
-                return f"🤖 {agent_name.replace('_', ' ').title()} Agent: I received your message '{message[:50]}{ellipsis}'.\n\n⚠️ Agent Error: {str(agent_error)}\n\nThis indicates the agent integration needs to be updated for the correct Google ADK API."
-            
+                agent_title = agent_name.replace("_", " ").title()
+                error_str = str(agent_error)
+                return (
+                    f"🤖 {agent_title} Agent: I received your message "
+                    f"'{message[:50]}{ellipsis}'.\n\n⚠️ Agent Error: "
+                    f"{error_str}\n\nThis indicates the agent integration "
+                    "needs to be updated for the correct Google ADK API."
+                )
+
         except Exception as e:
-            logger.error(f"Error getting response from {agent_name}: {str(e)}")
-            return f"❌ Sorry, I encountered an error while processing your request: {str(e)}"
-    
+            error_str = str(e)
+            logger.error(f"Error getting response from {agent_name}: {error_str}")
+            return (
+                "❌ Sorry, I encountered an error while processing your "
+                f"request: {error_str}"
+            )
+
     def _process_event(self, event, responses):
         """Process a single event from the agent runner synchronously"""
         try:
             logger.debug(f"Received event type: {type(event)}")
-            logger.debug(f"Event attributes: {[attr for attr in dir(event) if not attr.startswith('_')]}")
-            
+            event_attrs = [attr for attr in dir(event) if not attr.startswith("_")]
+            logger.debug(f"Event attributes: {event_attrs}")
+
             # Check for function calls (tool usage) - this is what we want to see!
-            if hasattr(event, 'get_function_calls'):
+            if hasattr(event, "get_function_calls"):
                 function_calls = event.get_function_calls()
                 if function_calls:
                     logger.debug(f"✅ Function calls in event: {function_calls}")
                 else:
                     logger.debug("No function calls in this event")
-            
+
             # Check for tool/function responses
-            if hasattr(event, 'get_function_responses'):
+            if hasattr(event, "get_function_responses"):
                 function_responses = event.get_function_responses()
                 if function_responses:
-                    logger.debug(f"✅ Function responses in event: {function_responses}")
-            
+                    logger.debug(
+                        f"✅ Function responses in event: {function_responses}"
+                    )
+
             # Try to extract text content from various ADK Event structures
             event_text = None
-            
+
             # Check if it's an LLM response event with actions
-            if hasattr(event, 'actions') and event.actions:
+            if hasattr(event, "actions") and event.actions:
                 for action in event.actions:
-                    logger.debug(f"Action type: {type(action)}, attributes: {[attr for attr in dir(action) if not attr.startswith('_')]}")
-                    if hasattr(action, 'text') and action.text:
+                    action_attrs = [
+                        attr for attr in dir(action) if not attr.startswith("_")
+                    ]
+                    logger.debug(
+                        f"Action type: {type(action)}, attributes: " f"{action_attrs}"
+                    )
+                    if hasattr(action, "text") and action.text:
                         event_text = action.text
                         break
-                    elif hasattr(action, 'content') and action.content:
+                    elif hasattr(action, "content") and action.content:
                         # Check if content has parts with text
-                        if hasattr(action.content, 'parts'):
+                        if hasattr(action.content, "parts"):
                             for part in action.content.parts:
-                                if hasattr(part, 'text') and part.text:
+                                if hasattr(part, "text") and part.text:
                                     event_text = part.text
                                     break
                         else:
                             event_text = str(action.content)
                         break
-            
+
             # Check if event itself has content (this is where the response is!)
-            if hasattr(event, 'content') and event.content:
+            if hasattr(event, "content") and event.content:
                 logger.debug(f"Event content type: {type(event.content)}")
-                if hasattr(event.content, 'parts'):
+                if hasattr(event.content, "parts"):
                     for part in event.content.parts:
-                        if hasattr(part, 'text') and part.text:
+                        if hasattr(part, "text") and part.text:
                             event_text = part.text
-                            logger.debug(f"Found text in content.parts: {part.text[:100]}...")
+                            logger.debug(
+                                f"Found text in content.parts: {part.text[:100]}..."
+                            )
                             break
-                elif hasattr(event.content, 'text'):
+                elif hasattr(event.content, "text"):
                     event_text = event.content.text
-                    logger.debug(f"Found text in content: {event.content.text[:100]}...")
+                    logger.debug(
+                        f"Found text in content: {event.content.text[:100]}..."
+                    )
                 else:
                     event_text = str(event.content)
-            
+
             # Check if event has direct text attribute
-            elif hasattr(event, 'text') and event.text:
+            elif hasattr(event, "text") and event.text:
                 event_text = event.text
-            
+
             # Log what we found and add to responses
             if event_text:
                 logger.debug(f"Extracted text: {event_text[:100]}...")
                 responses.append(event_text)
             else:
-                logger.debug(f"No text found in event. Event structure: {vars(event) if hasattr(event, '__dict__') else str(event)}")
-        
+                event_structure = (
+                    vars(event) if hasattr(event, "__dict__") else str(event)
+                )
+                logger.debug(
+                    f"No text found in event. Event structure: " f"{event_structure}"
+                )
+
         except Exception as e:
             logger.error(f"Error processing event: {e}")
             responses.append(f"Error processing response: {str(e)}")
@@ -435,85 +567,109 @@ class ChatbotManager:
         """Process a single event from the agent runner asynchronously"""
         try:
             logger.debug(f"Received event type: {type(event)}")
-            logger.debug(f"Event attributes: {[attr for attr in dir(event) if not attr.startswith('_')]}")
-            
+            event_attrs = [attr for attr in dir(event) if not attr.startswith("_")]
+            logger.debug(f"Event attributes: {event_attrs}")
+
             # Check for function calls (tool usage) - this is what we want to see!
-            if hasattr(event, 'get_function_calls'):
+            if hasattr(event, "get_function_calls"):
                 function_calls = event.get_function_calls()
                 if function_calls:
                     logger.debug(f"✅ Function calls in event: {function_calls}")
                 else:
                     logger.debug("No function calls in this event")
-            
+
             # Check for tool/function responses
-            if hasattr(event, 'get_function_responses'):
+            if hasattr(event, "get_function_responses"):
                 function_responses = event.get_function_responses()
                 if function_responses:
-                    logger.debug(f"✅ Function responses in event: {function_responses}")
-            
+                    logger.debug(
+                        f"✅ Function responses in event: {function_responses}"
+                    )
+
             # Try to extract text content from various ADK Event structures
             event_text = None
-            
+
             # Check if it's an LLM response event with actions
-            if hasattr(event, 'actions') and event.actions:
+            if hasattr(event, "actions") and event.actions:
                 for action in event.actions:
-                    logger.debug(f"Action type: {type(action)}, attributes: {[attr for attr in dir(action) if not attr.startswith('_')]}")
-                    if hasattr(action, 'text') and action.text:
+                    action_attrs = [
+                        attr for attr in dir(action) if not attr.startswith("_")
+                    ]
+                    logger.debug(
+                        f"Action type: {type(action)}, attributes: " f"{action_attrs}"
+                    )
+                    if hasattr(action, "text") and action.text:
                         event_text = action.text
                         break
-                    elif hasattr(action, 'content') and action.content:
+                    elif hasattr(action, "content") and action.content:
                         # Check if content has parts with text
-                        if hasattr(action.content, 'parts'):
+                        if hasattr(action.content, "parts"):
                             for part in action.content.parts:
-                                if hasattr(part, 'text') and part.text:
+                                if hasattr(part, "text") and part.text:
                                     event_text = part.text
                                     break
                         else:
                             event_text = str(action.content)
                         break
-            
+
             # Check if event itself has content (this is where the response is!)
-            if hasattr(event, 'content') and event.content:
+            if hasattr(event, "content") and event.content:
                 logger.debug(f"Event content type: {type(event.content)}")
-                if hasattr(event.content, 'parts'):
+                if hasattr(event.content, "parts"):
                     for part in event.content.parts:
-                        if hasattr(part, 'text') and part.text:
+                        if hasattr(part, "text") and part.text:
                             event_text = part.text
-                            logger.debug(f"Found text in content.parts: {part.text[:100]}...")
+                            logger.debug(
+                                f"Found text in content.parts: {part.text[:100]}..."
+                            )
                             break
-                elif hasattr(event.content, 'text'):
+                elif hasattr(event.content, "text"):
                     event_text = event.content.text
-                    logger.debug(f"Found text in content: {event.content.text[:100]}...")
+                    logger.debug(
+                        f"Found text in content: {event.content.text[:100]}..."
+                    )
                 else:
                     event_text = str(event.content)
-            
+
             # Check if event has direct text attribute
-            elif hasattr(event, 'text') and event.text:
+            elif hasattr(event, "text") and event.text:
                 event_text = event.text
-            
+
             # Log what we found and add to responses
             if event_text:
                 logger.debug(f"Extracted text: {event_text[:100]}...")
                 responses.append(event_text)
             else:
-                logger.debug(f"No text found in event. Event structure: {vars(event) if hasattr(event, '__dict__') else str(event)}")
-        
+                event_structure = (
+                    vars(event) if hasattr(event, "__dict__") else str(event)
+                )
+                logger.debug(
+                    f"No text found in event. Event structure: " f"{event_structure}"
+                )
+
         except Exception as e:
             logger.error(f"Error processing event: {e}")
             responses.append(f"Error processing response: {str(e)}")
-    
+
     def auto_select_agent(self, message: str) -> str:
         """Automatically select the best agent based on message content"""
         message_lower = message.lower()
-        
+
         # Simple keyword-based routing
-        if "day_planner" in self.agents and any(word in message_lower for word in ["weather", "plan", "day", "activity", "outdoor"]):
+        if "day_planner" in self.agents and any(
+            word in message_lower
+            for word in ["weather", "plan", "day", "activity", "outdoor"]
+        ):
             return "day_planner"
-        elif "google_search" in self.agents and any(word in message_lower for word in ["search", "find", "google", "research", "fact"]):
+        elif "google_search" in self.agents and any(
+            word in message_lower
+            for word in ["search", "find", "google", "research", "fact"]
+        ):
             return "google_search"
         else:
             # Return first available agent
             return next(iter(self.agents.keys())) if self.agents else "demo"
+
 
 def initialize_session_state():
     """Initialize Streamlit session state variables"""
@@ -521,36 +677,42 @@ def initialize_session_state():
         st.session_state.messages = [
             {
                 "role": "assistant",
-                "content": "👋 Hello! I'm your Home Agent Suite assistant. I can help you with day planning based on weather forecasts and answer questions using web search. How can I assist you today?",
+                "content": (
+                    "👋 Hello! I'm your Home Agent Suite assistant. I can "
+                    "help you with day planning based on weather forecasts "
+                    "and answer questions using web search. How can I "
+                    "assist you today?"
+                ),
                 "timestamp": datetime.now().isoformat(),
-                "agent": "system"
+                "agent": "system",
             }
         ]
-    
+
     if "chatbot_manager" not in st.session_state:
         st.session_state.chatbot_manager = ChatbotManager()
         logger.debug("Created new ChatbotManager in session state")
     else:
         logger.debug("Using existing ChatbotManager from session state")
-    
+
     if "selected_agent" not in st.session_state:
         st.session_state.selected_agent = "auto"
-    
+
     if "conversation_id" not in st.session_state:
         st.session_state.conversation_id = f"chat_{int(time.time())}"
+
 
 def render_sidebar():
     """Render the sidebar with settings and controls"""
     with st.sidebar:
         st.title("🏠 Home Agent Suite")
         st.markdown("---")
-        
+
         # Agent selection
         st.subheader("🤖 Agent Selection")
-        
+
         # Build agent options based on available agents
         agent_options = {"auto": "🧠 Auto-Select"}
-        
+
         # Add available agents
         available_agents = st.session_state.chatbot_manager.agents.keys()
         for agent_name in available_agents:
@@ -562,50 +724,57 @@ def render_sidebar():
                 agent_options[agent_name] = "🎭 Demo Agent"
             else:
                 agent_options[agent_name] = f"🤖 {agent_name.replace('_', ' ').title()}"
-        
+
         st.session_state.selected_agent = st.selectbox(
             "Choose an agent:",
             options=list(agent_options.keys()),
             format_func=lambda x: agent_options[x],
-            index=list(agent_options.keys()).index(st.session_state.selected_agent)
+            index=list(agent_options.keys()).index(st.session_state.selected_agent),
         )
-        
+
         st.markdown("---")
-        
+
         # Conversation controls
         st.subheader("💬 Conversation")
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             if st.button("🗑️ Clear Chat", use_container_width=True):
-                st.session_state.messages = [st.session_state.messages[0]]  # Keep welcome message
+                st.session_state.messages = [
+                    st.session_state.messages[0]
+                ]  # Keep welcome message
                 st.session_state.conversation_id = f"chat_{int(time.time())}"
                 st.rerun()
-        
+
         with col2:
             if st.button("📥 Export Chat", use_container_width=True):
                 export_chat_history()
-        
+
         st.markdown("---")
-        
+
         # Statistics
         st.subheader("📊 Statistics")
-        message_count = len([msg for msg in st.session_state.messages if msg["role"] == "user"])
+        message_count = len(
+            [msg for msg in st.session_state.messages if msg["role"] == "user"]
+        )
         st.metric("Messages Sent", message_count)
         st.metric("Conversation ID", st.session_state.conversation_id[-8:])
-        
+
         st.markdown("---")
-        
+
         # Information
         st.subheader("ℹ️ About")
-        st.markdown("""
+        st.markdown(
+            """
         This chatbot integrates with:
         - **Day Planner Agent**: Weather-based activity planning
         - **Google Search Agent**: Real-time information retrieval
-        
+
         Built with Streamlit and Google ADK.
-        """)
+        """
+        )
+
 
 def export_chat_history():
     """Export chat history as JSON"""
@@ -614,29 +783,31 @@ def export_chat_history():
             "conversation_id": st.session_state.conversation_id,
             "export_timestamp": datetime.now().isoformat(),
             "message_count": len(st.session_state.messages),
-            "messages": st.session_state.messages
+            "messages": st.session_state.messages,
         }
-        
+
         json_string = json.dumps(chat_data, indent=2, ensure_ascii=False)
-        
+
         st.download_button(
             label="💾 Download Chat History",
             data=json_string,
             file_name=f"chat_history_{st.session_state.conversation_id}.json",
             mime="application/json",
-            use_container_width=True
+            use_container_width=True,
         )
-        
+
         st.success("✅ Chat history prepared for download!")
-        
+
     except Exception as e:
         st.error(f"❌ Error exporting chat history: {str(e)}")
+
 
 def show_typing_indicator():
     """Show typing indicator while processing"""
     typing_placeholder = st.empty()
     with typing_placeholder.container():
-        st.markdown("""
+        st.markdown(
+            """
         <div class="typing-indicator">
             <span>🤖 Assistant is typing</span>
             <div class="typing-dots">
@@ -645,30 +816,33 @@ def show_typing_indicator():
                 <span></span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-    
+        """,
+            unsafe_allow_html=True,
+        )
+
     time.sleep(1.5)  # Simulate processing time
     typing_placeholder.empty()
+
 
 def render_chat_interface():
     """Render the main chat interface"""
     st.title("💬 Home Agent Chat")
     st.markdown("Ask me about day planning, weather insights, or general questions!")
-    
+
     # Display chat messages
     for message in st.session_state.messages:
         role = message["role"]
         content = message["content"]
         agent = message.get("agent", "unknown")
         timestamp = message.get("timestamp", "")
-        
+
         # Format timestamp for display
         try:
-            dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
             time_display = dt.strftime("%H:%M")
-        except:
+        except Exception:
             time_display = ""
-        
+
         # Determine avatar
         if role == "user":
             avatar = "👤"
@@ -678,11 +852,12 @@ def render_chat_interface():
             avatar = "🔍"
         else:
             avatar = "🤖"
-        
+
         with st.chat_message(role, avatar=avatar):
             st.markdown(content)
             if time_display:
                 st.caption(f"⏰ {time_display}")
+
 
 def handle_user_input():
     """Handle user input and generate response"""
@@ -692,66 +867,74 @@ def handle_user_input():
             "role": "user",
             "content": prompt,
             "timestamp": datetime.now().isoformat(),
-            "agent": "user"
+            "agent": "user",
         }
         st.session_state.messages.append(user_message)
-        
+
         # Display user message
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
-        
+
         # Show typing indicator
         with st.chat_message("assistant", avatar="🤖"):
             show_typing_indicator()
-            
+
             # Determine which agent to use
             if st.session_state.selected_agent == "auto":
-                selected_agent = st.session_state.chatbot_manager.auto_select_agent(prompt)
+                selected_agent = st.session_state.chatbot_manager.auto_select_agent(
+                    prompt
+                )
             else:
                 selected_agent = st.session_state.selected_agent
-            
+
             # Get response from agent
-            response = st.session_state.chatbot_manager.get_agent_response(selected_agent, prompt)
-            
+            response = st.session_state.chatbot_manager.get_agent_response(
+                selected_agent, prompt
+            )
+
             # Display response
             st.markdown(response)
-            
+
             # Add assistant message to chat
             assistant_message = {
                 "role": "assistant",
                 "content": response,
                 "timestamp": datetime.now().isoformat(),
-                "agent": selected_agent
+                "agent": selected_agent,
             }
             st.session_state.messages.append(assistant_message)
-            
+
             # Show timestamp
-            st.caption(f"⏰ {datetime.now().strftime('%H:%M')} • Agent: {selected_agent.replace('_', ' ').title()}")
+            agent_title = selected_agent.replace("_", " ").title()
+            timestamp = datetime.now().strftime("%H:%M")
+            st.caption(f"⏰ {timestamp} • Agent: {agent_title}")
+
 
 def main():
     """Main application function"""
     try:
         # Load custom CSS
         load_custom_css()
-        
+
         # Initialize session state
         initialize_session_state()
-        
+
         # Render sidebar
         render_sidebar()
-        
+
         # Render main chat interface
         render_chat_interface()
-        
+
         # Handle user input
         handle_user_input()
-        
+
         logger.info("Streamlit chatbot application rendered successfully")
-        
+
     except Exception as e:
         logger.error(f"Error in main application: {str(e)}")
         st.error(f"❌ Application Error: {str(e)}")
         st.info("Please refresh the page or contact support if the issue persists.")
+
 
 if __name__ == "__main__":
     main()
