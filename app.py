@@ -247,11 +247,8 @@ class ChatbotManager:
 
             # Call the actual Google ADK agent
             try:
-                # Debug: Log available methods on the agent
-                agent_methods = [
-                    method for method in dir(agent) if not method.startswith("_")
-                ]
-                logger.debug(f"Agent {agent_name} methods: {agent_methods}")
+                # Log agent initialization for troubleshooting
+                logger.info(f"Initializing agent: {agent_name}")
 
                 # Use InMemoryRunner with proper run_async call like ADK web does
                 from google.adk.runners import InMemoryRunner
@@ -272,10 +269,7 @@ class ChatbotManager:
                         self.runners[agent_name].session_service = (
                             self.shared_session_service
                         )
-                        logger.debug(
-                            f"Created new InMemoryRunner for {agent_name} and "
-                            "set shared session service"
-                        )
+                        logger.info(f"Created InMemoryRunner for {agent_name}")
                     except Exception as runner_error:
                         logger.error(f"Failed to create Runner: {runner_error}")
                         raise Exception(
@@ -284,18 +278,7 @@ class ChatbotManager:
 
                 runner = self.runners[agent_name]
 
-                logger.debug("🔧 USING INMEMORY RUNNER - Following ADK web pattern")
-                logger.debug(
-                    f"🔧 Runner instance ID: {id(runner)} "
-                    "(same instance = session persistence)"
-                )
-                shared_id = id(self.shared_session_service)
-                logger.debug(
-                    f"🔧 Session service ID: {id(runner.session_service)} "
-                    f"(should be same as shared: {shared_id})"
-                )
-                logger.debug(f"🔧 Message: {message}")
-                logger.debug(f"🔧 Agent: {agent.name}")
+                logger.info(f"Processing message for {agent.name}")
 
                 try:
                     # Create the content for the user message exactly like ADK web does
@@ -303,60 +286,37 @@ class ChatbotManager:
                         parts=[types.Part.from_text(text=message)], role="user"
                     )
 
-                    logger.debug(f"🔧 Created user content: {user_content}")
-
                     # Use consistent session ID from Streamlit session state
                     # (with fallback for testing)
                     user_id = "streamlit_user"
                     try:
-                        session_id = (
-                            st.session_state.conversation_id
-                        )  # Use existing conversation ID
-                        logger.info(
-                            f"🔑 Using existing conversation_id from "
-                            f"Streamlit session: {session_id}"
-                        )
+                        session_id = st.session_state.conversation_id
+                        logger.debug(f"Using session: {session_id}")
                     except AttributeError:
                         # Fallback for non-Streamlit contexts (testing)
                         session_id = "test_session"
-                        logger.info(f"🔑 Fallback session_id for testing: {session_id}")
-
-                    logger.debug(f"Using session_id: {session_id}, user_id: {user_id}")
-
-                    # Also log the app name to ensure consistency
-                    logger.debug(f"Using app_name: {agent_name} for agent session")
+                        logger.debug(f"Using fallback session: {session_id}")
 
                     async def run_agent():
                         """Async wrapper for runner call - exactly like ADK web"""
-                        logger.debug("🚀 CALLING RUNNER.RUN_ASYNC like ADK web")
-
                         # Check if session exists first, create only if needed
                         existing_session = None
                         try:
-                            logger.debug(f"🔍 Checking if session exists: {session_id}")
                             existing_session = await runner.session_service.get_session(
                                 app_name=agent_name,
                                 user_id=user_id,
                                 session_id=session_id,
                             )
                             num_events = len(existing_session.events)
-                            logger.debug(
-                                f"✅ Found existing session: {session_id} "
-                                f"with {num_events} events"
-                            )
-                        except Exception as get_error:
-                            logger.debug(
-                                "🔍 Session doesn't exist, creating new one: "
-                                f"{get_error}"
-                            )
+                            logger.debug(f"Session found with {num_events} events")
+                        except Exception:
+                            logger.debug("Creating new session")
                             try:
                                 await runner.session_service.create_session(
                                     app_name=agent_name,
                                     user_id=user_id,
                                     session_id=session_id,
                                 )
-                                logger.debug(f"✅ Session created: {session_id}")
-
                                 # Get the newly created session
                                 existing_session = (
                                     await runner.session_service.get_session(
@@ -367,33 +327,11 @@ class ChatbotManager:
                                 )
                             except Exception as create_error:
                                 logger.error(
-                                    f"❌ Failed to create session: {create_error}"
+                                    f"Failed to create session: {create_error}"
                                 )
                                 raise create_error
 
-                        # Log session history for debugging
-                        if existing_session and existing_session.events:
-                            num_events = len(existing_session.events)
-                            logger.debug(
-                                f"📜 Session history summary ({num_events} "
-                                "total events):"
-                            )
-                            for i, event in enumerate(
-                                existing_session.events[-5:]
-                            ):  # Show last 5 events
-                                if hasattr(event, "content") and event.content:
-                                    content_preview = str(event.content)[:100]
-                                    logger.debug(f"📜 Event {i}: {content_preview}...")
-                                else:
-                                    event_str = str(event)[:100]
-                                    logger.debug(
-                                        f"📜 Event {i}: {type(event)} - "
-                                        f"{event_str}..."
-                                    )
-                        else:
-                            logger.debug(
-                                "📜 Session history is empty or session is None"
-                            )
+                        # Session is ready for processing
 
                         responses = []
                         event_count = 0
@@ -416,9 +354,6 @@ class ChatbotManager:
                             ),  # Like ADK web
                         ):
                             event_count += 1
-                            logger.debug(
-                                f"🎯 RUNNER ASYNC EVENT {event_count}: {type(event)}"
-                            )
                             await self._process_event_async(event, responses)
 
                         return responses, event_count
@@ -431,10 +366,9 @@ class ChatbotManager:
                         asyncio.set_event_loop(loop)
 
                     responses, event_count = loop.run_until_complete(run_agent())
-
                     logger.debug(
-                        f"🎯 RUNNER ASYNC COMPLETED - Total events: "
-                        f"{event_count}, Responses: {len(responses)}"
+                        f"Completed processing {event_count} events, "
+                        f"{len(responses)} responses"
                     )
                     response = (
                         "\n".join(responses) if responses else "No response from agent"
@@ -475,181 +409,62 @@ class ChatbotManager:
                 f"request: {error_str}"
             )
 
-    def _process_event(self, event, responses):
-        """Process a single event from the agent runner synchronously"""
-        try:
-            logger.debug(f"Received event type: {type(event)}")
-            event_attrs = [attr for attr in dir(event) if not attr.startswith("_")]
-            logger.debug(f"Event attributes: {event_attrs}")
-
-            # Check for function calls (tool usage) - this is what we want to see!
-            if hasattr(event, "get_function_calls"):
-                function_calls = event.get_function_calls()
-                if function_calls:
-                    logger.debug(f"✅ Function calls in event: {function_calls}")
-                else:
-                    logger.debug("No function calls in this event")
-
-            # Check for tool/function responses
-            if hasattr(event, "get_function_responses"):
-                function_responses = event.get_function_responses()
-                if function_responses:
-                    logger.debug(
-                        f"✅ Function responses in event: {function_responses}"
-                    )
-
-            # Try to extract text content from various ADK Event structures
-            event_text = None
-
-            # Check if it's an LLM response event with actions
-            if hasattr(event, "actions") and event.actions:
-                for action in event.actions:
-                    action_attrs = [
-                        attr for attr in dir(action) if not attr.startswith("_")
-                    ]
-                    logger.debug(
-                        f"Action type: {type(action)}, attributes: " f"{action_attrs}"
-                    )
-                    if hasattr(action, "text") and action.text:
-                        event_text = action.text
-                        break
-                    elif hasattr(action, "content") and action.content:
-                        # Check if content has parts with text
-                        if hasattr(action.content, "parts"):
-                            for part in action.content.parts:
-                                if hasattr(part, "text") and part.text:
-                                    event_text = part.text
-                                    break
-                        else:
-                            event_text = str(action.content)
-                        break
-
-            # Check if event itself has content (this is where the response is!)
-            if hasattr(event, "content") and event.content:
-                logger.debug(f"Event content type: {type(event.content)}")
-                if hasattr(event.content, "parts"):
-                    for part in event.content.parts:
-                        if hasattr(part, "text") and part.text:
-                            event_text = part.text
-                            logger.debug(
-                                f"Found text in content.parts: {part.text[:100]}..."
-                            )
-                            break
-                elif hasattr(event.content, "text"):
-                    event_text = event.content.text
-                    logger.debug(
-                        f"Found text in content: {event.content.text[:100]}..."
-                    )
-                else:
-                    event_text = str(event.content)
-
-            # Check if event has direct text attribute
-            elif hasattr(event, "text") and event.text:
-                event_text = event.text
-
-            # Log what we found and add to responses
-            if event_text:
-                logger.debug(f"Extracted text: {event_text[:100]}...")
-                responses.append(event_text)
-            else:
-                event_structure = (
-                    vars(event) if hasattr(event, "__dict__") else str(event)
-                )
-                logger.debug(
-                    f"No text found in event. Event structure: " f"{event_structure}"
-                )
-
-        except Exception as e:
-            logger.error(f"Error processing event: {e}")
-            responses.append(f"Error processing response: {str(e)}")
-
     async def _process_event_async(self, event, responses):
-        """Process a single event from the agent runner asynchronously"""
+        """Process a single event from the agent runner"""
         try:
-            logger.debug(f"Received event type: {type(event)}")
-            event_attrs = [attr for attr in dir(event) if not attr.startswith("_")]
-            logger.debug(f"Event attributes: {event_attrs}")
-
-            # Check for function calls (tool usage) - this is what we want to see!
+            # Log function calls for debugging
             if hasattr(event, "get_function_calls"):
                 function_calls = event.get_function_calls()
                 if function_calls:
-                    logger.debug(f"✅ Function calls in event: {function_calls}")
-                else:
-                    logger.debug("No function calls in this event")
+                    logger.debug(f"Function calls: {function_calls}")
 
-            # Check for tool/function responses
+            # Log function responses for debugging
             if hasattr(event, "get_function_responses"):
                 function_responses = event.get_function_responses()
                 if function_responses:
-                    logger.debug(
-                        f"✅ Function responses in event: {function_responses}"
-                    )
+                    logger.debug(f"Function responses: {function_responses}")
 
-            # Try to extract text content from various ADK Event structures
-            event_text = None
+            # Extract text content from the event
+            event_text = self._extract_text_from_event(event)
 
-            # Check if it's an LLM response event with actions
-            if hasattr(event, "actions") and event.actions:
-                for action in event.actions:
-                    action_attrs = [
-                        attr for attr in dir(action) if not attr.startswith("_")
-                    ]
-                    logger.debug(
-                        f"Action type: {type(action)}, attributes: " f"{action_attrs}"
-                    )
-                    if hasattr(action, "text") and action.text:
-                        event_text = action.text
-                        break
-                    elif hasattr(action, "content") and action.content:
-                        # Check if content has parts with text
-                        if hasattr(action.content, "parts"):
-                            for part in action.content.parts:
-                                if hasattr(part, "text") and part.text:
-                                    event_text = part.text
-                                    break
-                        else:
-                            event_text = str(action.content)
-                        break
-
-            # Check if event itself has content (this is where the response is!)
-            if hasattr(event, "content") and event.content:
-                logger.debug(f"Event content type: {type(event.content)}")
-                if hasattr(event.content, "parts"):
-                    for part in event.content.parts:
-                        if hasattr(part, "text") and part.text:
-                            event_text = part.text
-                            logger.debug(
-                                f"Found text in content.parts: {part.text[:100]}..."
-                            )
-                            break
-                elif hasattr(event.content, "text"):
-                    event_text = event.content.text
-                    logger.debug(
-                        f"Found text in content: {event.content.text[:100]}..."
-                    )
-                else:
-                    event_text = str(event.content)
-
-            # Check if event has direct text attribute
-            elif hasattr(event, "text") and event.text:
-                event_text = event.text
-
-            # Log what we found and add to responses
             if event_text:
-                logger.debug(f"Extracted text: {event_text[:100]}...")
                 responses.append(event_text)
-            else:
-                event_structure = (
-                    vars(event) if hasattr(event, "__dict__") else str(event)
-                )
-                logger.debug(
-                    f"No text found in event. Event structure: " f"{event_structure}"
-                )
 
         except Exception as e:
             logger.error(f"Error processing event: {e}")
             responses.append(f"Error processing response: {str(e)}")
+
+    def _extract_text_from_event(self, event):
+        """Extract text content from various ADK Event structures"""
+        # Check if it's an LLM response event with actions
+        if hasattr(event, "actions") and event.actions:
+            for action in event.actions:
+                if hasattr(action, "text") and action.text:
+                    return action.text
+                elif hasattr(action, "content") and action.content:
+                    if hasattr(action.content, "parts"):
+                        for part in action.content.parts:
+                            if hasattr(part, "text") and part.text:
+                                return part.text
+                    else:
+                        return str(action.content)
+
+        # Check if event itself has content
+        if hasattr(event, "content") and event.content:
+            if hasattr(event.content, "parts"):
+                for part in event.content.parts:
+                    if hasattr(part, "text") and part.text:
+                        return part.text
+            elif hasattr(event.content, "text"):
+                return event.content.text
+            else:
+                return str(event.content)
+
+        # Check if event has direct text attribute
+        elif hasattr(event, "text") and event.text:
+            return event.text
+
+        return None
 
     def auto_select_agent(self, message: str) -> str:
         """Automatically select the best agent based on message content"""
