@@ -161,3 +161,53 @@ tomorrow-io-client = { path = "../../libs/tomorrow_io_client", develop = true }
 - Secret detection via `detect-secrets`
 - All components should have unit tests
 - Mock external API calls in tests
+
+### Code Style and Linting Standards
+**CRITICAL**: Always write code that follows these standards from the start to avoid extensive cleanup:
+
+#### Flake8 Rules (Max Line Length: 88 characters)
+- **Line length**: Keep lines under 88 characters, break at ~85 to be safe
+- **Remove unused imports**: Delete any imports that aren't actually used in the code
+- **Exception handling**: Never use bare `except:` - always specify `Exception` or specific exception types
+- **F-string usage**: Don't use f-strings without placeholders - use regular strings instead
+- **Import organization**: Group imports properly (standard library, third-party, local)
+
+#### Black Formatting
+- **Multi-line strings**: Use parentheses for long strings instead of single long lines:
+  ```python
+  # Good
+  message = (
+      "This is a long message that spans multiple lines "
+      "and stays within the line length limit"
+  )
+
+  # Bad
+  message = "This is a long message that spans multiple lines and goes over the line length limit"
+  ```
+- **Function calls**: Break long function calls across multiple lines with proper indentation
+- **String concatenation**: Use parentheses for readability instead of backslash line continuation
+
+#### Common Patterns to Avoid
+```python
+# Bad - unused imports
+from typing import Dict, List, Any, Optional  # Remove if not used
+import os  # Remove if not used
+
+# Bad - bare except
+try:
+    do_something()
+except:  # Should be 'except Exception:'
+    handle_error()
+
+# Bad - f-string without placeholder
+logger.debug(f"Starting process")  # Should be regular string
+
+# Bad - line too long
+logger.debug("This is a very long debug message that exceeds the 88 character limit and will cause flake8 errors")
+
+# Good - proper formatting
+logger.debug(
+    "This is a long debug message that is properly formatted "
+    "to stay within line length limits"
+)
+```
