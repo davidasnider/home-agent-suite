@@ -13,6 +13,5 @@ config:
   github-management:require_up_to_date: "true"
   github-management:enforce_admins: "true"
   github-management:status_check_contexts:
-    - "ci/quality-checks"
-    - "ci/tests"
+    - "Code Quality and Tests"
   github-management:delete_branch_on_merge: "true"
