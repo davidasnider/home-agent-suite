@@ -37,7 +37,8 @@ def main():
     repo_config = RepositorySettingsConfig()
 
     # Create repository with settings
-    repository = create_repository_settings(repo_config)
+    repository_resources = create_repository_settings(repo_config)
+    repository = repository_resources["repository"]
 
     # Setup repository governance
     resources = setup_repository_settings(
@@ -49,6 +50,9 @@ def main():
     pulumi.export("protected_branch", resources["protected_branch"])
     pulumi.export("branch_protection_id", resources["branch_protection"].id)
     pulumi.export("repository_id", repository.id)
+    pulumi.export(
+        "actions_permissions_id", repository_resources["actions_permissions"].id
+    )
 
     # Export branch protection details for reference
     pulumi.export(
