@@ -5,7 +5,7 @@ These tests verify that the supervisor agent is properly created and configured
 with the expected tools and capabilities.
 """
 
-from supervisor.agent import create_supervisor_agent
+from supervisor.agent import create_supervisor_agent, MODEL_NAME
 
 
 def test_supervisor_agent_creation():
@@ -14,6 +14,7 @@ def test_supervisor_agent_creation():
 
     assert agent is not None
     assert agent.name == "supervisor_agent"
+    assert agent.model == MODEL_NAME
     assert agent.model == "gemini-2.5-pro"
     assert len(agent.tools) == 2  # weather tool + google search
 
@@ -48,3 +49,8 @@ def test_supervisor_agent_instruction():
     assert "supervisor" in instruction.lower() or "delegate" in instruction.lower()
     assert "weather" in instruction.lower()
     assert "search" in instruction.lower()
+
+
+def test_supervisor_model_constant():
+    """Test that MODEL_NAME constant is correct"""
+    assert MODEL_NAME == "gemini-2.5-pro"
