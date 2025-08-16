@@ -22,7 +22,7 @@ supervisor-agent = {path = "agents/supervisor", develop = true}
 common-logging = {path = "libs/common_logging", develop = true}
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.7.0"
+pre-commit = "^4.3.0"
 black = "^24.4.2"
 flake8 = "^7.0.0"
 detect-secrets = "^1.5.0"
