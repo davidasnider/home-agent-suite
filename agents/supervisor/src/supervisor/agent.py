@@ -36,6 +36,9 @@ except ImportError as e:
         f"Failed to import required dependencies: {e}. " f"Searched in: {agents_dir}"
     )
 
+# Model configuration
+MODEL_NAME = "gemini-2.5-pro"
+
 # Initialize logging for the supervisor agent
 setup_logging(service_name="supervisor_agent")
 logger = logging.getLogger(__name__)
@@ -55,7 +58,7 @@ def create_supervisor_agent() -> Agent:
         Agent: Configured Supervisor Agent with access to all specialized tools
 
     Agent Configuration:
-        - Model: gemini-2.5-pro (for sophisticated reasoning and delegation)
+        - Model: {MODEL_NAME} (for sophisticated reasoning and delegation)
         - Tools: All tools from specialized agents (weather, search)
         - Capabilities: Query analysis, intelligent routing, unified responses
     """
@@ -121,7 +124,7 @@ def create_supervisor_agent() -> Agent:
 
     agent = Agent(
         name="supervisor_agent",
-        model="gemini-2.5-pro",
+        model=MODEL_NAME,
         description=(
             "Intelligent supervisor agent that delegates queries to "
             "specialized capabilities"

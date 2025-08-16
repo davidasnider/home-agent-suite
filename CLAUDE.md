@@ -224,3 +224,5 @@ logger.debug(
 ```
 
 - add to memory. Always use pre-commit on all files for linting and formatting. Do not run those commands directly
+
+- Add to memory, before starting any work, if we are on the main branch we must create a new branch
