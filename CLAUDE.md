@@ -296,3 +296,25 @@ If you encounter issues after running the sync:
 4. Verify Python version compatibility with updated dependencies
 
 **Remember**: Dependabot updates can change dependency versions across the entire monorepo. This workflow ensures your local environment stays synchronized with the remote repository state.
+
+### Automated Script Alternative
+For convenience, use the provided shell script that automates the entire workflow:
+
+```bash
+# Full synchronization (recommended after git pull)
+./sync-deps.sh
+
+# Quick mode for minor updates
+./sync-deps.sh --quick
+
+# Regenerate lock files if out of sync
+./sync-deps.sh --lock
+
+# Skip environment verification
+./sync-deps.sh --skip-verify
+
+# Show all options
+./sync-deps.sh --help
+```
+
+The script provides colored output, error handling, and progress reporting for a better user experience.
