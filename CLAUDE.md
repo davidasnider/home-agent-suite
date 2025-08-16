@@ -222,3 +222,5 @@ logger.debug(
     "to stay within line length limits"
 )
 ```
+
+- add to memory. Always use pre-commit on all files for linting and formatting. Do not run those commands directly

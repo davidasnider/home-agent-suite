@@ -121,7 +121,7 @@ The chatbot automatically detects and integrates available agents:
    ```env
    # Tomorrow.io Weather API
    TOMORROW_IO_API_KEY=your_actual_tomorrow_io_key_here
-   
+
    # Google AI API (for Gemini models)
    GOOGLE_API_KEY=your_actual_google_ai_key_here
 
@@ -152,7 +152,7 @@ The chatbot automatically detects and integrates available agents:
    - **Alternative:** Use Chrome/Firefox: `open -a "Google Chrome" http://localhost:8501`
 
    With a valid API key, you'll now have access to:
-   - 🗓️ **Day Planner Agent** - Weather-based activity recommendations  
+   - 🗓️ **Day Planner Agent** - Weather-based activity recommendations
    - 🔍 **Google Search Agent** - Web research capabilities
    - 🎭 **Demo Agent** - Fallback demonstration mode
 
@@ -161,7 +161,7 @@ The chatbot automatically detects and integrates available agents:
 If you don't have API keys configured:
 
 - The application will still run with the **Google Search Agent** and **Demo Agent**
-- The Day Planner Agent will be unavailable but won't break the application  
+- The Day Planner Agent will be unavailable but won't break the application
 - You'll see helpful error messages in the UI indicating missing configuration
 - The sidebar will only show available agents
 
@@ -263,7 +263,7 @@ def load_custom_css():
 
 Application logs include:
 - Agent initialization status
-- Message routing decisions  
+- Message routing decisions
 - Error details and stack traces
 - Performance metrics
 
