@@ -50,8 +50,15 @@ class BranchProtectionConfig:
         self.require_up_to_date = config.get_bool("require_up_to_date", True)
         self.status_check_contexts = config.get_object("status_check_contexts", [])
 
-        # Admin settings
-        self.enforce_admins = config.get_bool("enforce_admins", False)
+        # Admin settings - Enable by default for enhanced security
+        self.enforce_admins = config.get_bool("enforce_admins", True)
+
+        # Advanced security settings
+        self.require_signed_commits = config.get_bool("require_signed_commits", True)
+        self.lock_branch = config.get_bool("lock_branch", False)
+        self.require_conversation_resolution = config.get_bool(
+            "require_conversation_resolution", True
+        )
 
 
 def create_branch_protection_rule(
@@ -120,7 +127,9 @@ def create_branch_protection_rule(
         enforce_admins=config.enforce_admins,
         # Additional security settings
         required_linear_history=True,  # Enforce linear history
-        require_conversation_resolution=True,  # Require conversation resolution
+        require_conversation_resolution=config.require_conversation_resolution,
+        require_signed_commits=config.require_signed_commits,
+        lock_branch=config.lock_branch,
     )
 
     return branch_protection

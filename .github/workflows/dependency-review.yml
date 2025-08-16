@@ -1,0 +1,32 @@
+name: "Dependency Review"
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail the build on high or critical vulnerabilities
+          fail-on-severity: high
+          # Comment on PR with findings
+          comment-summary-in-pr: always
+          # Allow approved licenses only
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, GPL-3.0
+          # Deny specific licenses
+          deny-licenses: GPL-2.0, LGPL-2.1
+          # Configuration for vulnerability database
+          vulnerability-check: true
+          # Custom configuration file (optional)
+          config-file: '.github/dependency-review-config.yml'
