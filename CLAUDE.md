@@ -226,3 +226,95 @@ logger.debug(
 - add to memory. Always use pre-commit on all files for linting and formatting. Do not run those commands directly
 
 - Add to memory, before starting any work, if we are on the main branch we must create a new branch
+
+## Post-Pull Dependency Synchronization
+
+**CRITICAL**: After pulling from main (especially when Dependabot has merged dependency updates), ALWAYS run the complete environment synchronization workflow to ensure your local development environment matches the updated dependencies.
+
+### When to Execute This Workflow
+- After any `git pull origin main`
+- When you see dependency-related files have changed (pyproject.toml, poetry.lock, .pre-commit-config.yaml)
+- Before starting any new development work
+- If you encounter import errors or dependency-related test failures
+
+### Complete Synchronization Command Sequence
+**Execute these commands in order from the repository root:**
+
+```bash
+# 1. Sync root Poetry environment with exact locked versions
+poetry sync
+
+# 2. Update all component Poetry environments
+for dir in agents/* libs/* infrastructure/*; do
+    if [ -f "$dir/pyproject.toml" ]; then
+        echo "Updating dependencies in $dir"
+        (cd "$dir" && poetry sync)
+    fi
+done
+
+# 3. Update pre-commit hooks if configuration changed
+pre-commit autoupdate
+pre-commit install --install-hooks
+
+# 4. Verify environment integrity (optional but recommended)
+poetry run pytest --collect-only -q >/dev/null 2>&1 && echo "✅ Environment sync successful" || echo "⚠️  Some tests may have import issues - check individual components"
+```
+
+### Simplified Version for Quick Updates
+**For minor updates or when you're confident only root dependencies changed:**
+
+```bash
+poetry sync && pre-commit install --install-hooks
+```
+
+### When Lock Files Are Out of Sync
+**If you see "poetry.lock was last generated" warnings:**
+
+```bash
+# Re-generate lock files for components with changes
+for dir in agents/* libs/* infrastructure/*; do
+    if [ -f "$dir/pyproject.toml" ]; then
+        (cd "$dir" && poetry lock --no-update)
+    fi
+done
+
+# Then run the full sync workflow above
+```
+
+### Important Notes
+- **Use `poetry sync`**: This is the newer command (replaced `poetry install --sync`)
+- **Component Independence**: Each agent/library has its own pyproject.toml that may need syncing
+- **Pre-commit Hooks**: These are versioned and need updating when .pre-commit-config.yaml changes
+- **Path Dependencies**: Our monorepo structure requires reinstallation of local packages when their dependencies change
+- **Lock File Conflicts**: Dependabot may update lock files that become out of sync with local changes
+
+### Troubleshooting
+If you encounter issues after running the sync:
+1. Clear Poetry cache: `poetry cache clear --all pypi`
+2. Remove and recreate virtual environment: `poetry env remove python && poetry install`
+3. Re-generate lock files: `poetry lock` (in root and affected components)
+4. Verify Python version compatibility with updated dependencies
+
+**Remember**: Dependabot updates can change dependency versions across the entire monorepo. This workflow ensures your local environment stays synchronized with the remote repository state.
+
+### Automated Script Alternative
+For convenience, use the provided shell script that automates the entire workflow:
+
+```bash
+# Full synchronization (recommended after git pull)
+./sync-deps.sh
+
+# Quick mode for minor updates
+./sync-deps.sh --quick
+
+# Regenerate lock files if out of sync
+./sync-deps.sh --lock
+
+# Skip environment verification
+./sync-deps.sh --skip-verify
+
+# Show all options
+./sync-deps.sh --help
+```
+
+The script provides colored output, error handling, and progress reporting for a better user experience.
