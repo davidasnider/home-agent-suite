@@ -4,7 +4,7 @@
 # Fail the build on these severity levels
 fail_on_severity: high
 
-# License configuration
+# License configuration - only allow approved licenses
 allow_licenses:
   - MIT
   - Apache-2.0
@@ -12,10 +12,6 @@ allow_licenses:
   - BSD-3-Clause
   - ISC
   - GPL-3.0
-
-deny_licenses:
-  - GPL-2.0
-  - LGPL-2.1
 
 # Vulnerability settings
 vulnerability_check: true
