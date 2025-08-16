@@ -32,12 +32,15 @@ from .prompt import instruction as agent_instruction
 from tomorrow_io_client.client import get_tmrw_weather_tool
 from common_logging.logging_utils import setup_logging
 
+# Model configuration
+MODEL_NAME = "gemini-2.5-flash"
+
 # Initialize logging for the day planner agent
 setup_logging(service_name="day_planner_agent")
 logger = logging.getLogger(__name__)
 
 logger.info("Initializing Day Planner Agent")
-logger.debug("Agent configuration: name=day_planner_agent, model=gemini-2.5-pro")
+logger.debug(f"Agent configuration: name=day_planner_agent, model={MODEL_NAME}")
 
 
 def _before_model_debug(**kwargs):
@@ -196,7 +199,7 @@ def create_day_planner_agent() -> Agent:
 
     agent = Agent(
         name="day_planner_agent",
-        model="gemini-2.5-pro",
+        model=MODEL_NAME,
         description="Helps users plan their day with weather insights.",
         instruction=agent_instruction,
         tools=[get_tmrw_weather_tool],
