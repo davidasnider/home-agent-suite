@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "supervisor-agent"
+version = "0.1.0"
+description = "Supervisor agent for delegating tasks to specialized agents in the home agent suite"
+authors = ["David Snider <david@snider.com>"]
+readme = "README.md"
+packages = [{include = "supervisor", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# Google ADK for agent framework
+google-adk = "^1.11.0"
+# Local dependencies (path-based for development)
+common-logging = { path = "../../libs/common_logging", develop = true }
+tomorrow-io-client = { path = "../../libs/tomorrow_io_client", develop = true }
+# Note: day_planner and google_search_agent imported via sys.path
+# until they are converted to proper packages
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.24.0"
+black = "^24.0.0"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -28,22 +28,14 @@ try:
 except ImportError:
     pass
 
-# Import existing agents with error handling
+# Import supervisor agent
 try:
-    from agents.day_planner.agent import create_day_planner_agent
+    from supervisor.agent import create_supervisor_agent
 
-    DAY_PLANNER_AVAILABLE = True
+    SUPERVISOR_AVAILABLE = True
 except Exception as e:
-    DAY_PLANNER_AVAILABLE = False
-    day_planner_error = str(e)
-
-try:
-    from agents.google_search_agent.agent import create_google_search_agent
-
-    GOOGLE_SEARCH_AVAILABLE = True
-except Exception as e:
-    GOOGLE_SEARCH_AVAILABLE = False
-    google_search_error = str(e)
+    SUPERVISOR_AVAILABLE = False
+    supervisor_error = str(e)
 
 from common_logging.logging_utils import setup_logging
 
@@ -191,29 +183,20 @@ class ChatbotManager:
             f"🗃️ Created shared session service: {id(self.shared_session_service)}"
         )
 
-        # Initialize available agents
-        if DAY_PLANNER_AVAILABLE:
+        # Initialize supervisor agent only
+        if SUPERVISOR_AVAILABLE:
             try:
-                self.agents["day_planner"] = create_day_planner_agent()
-                logger.info("Day planner agent initialized successfully")
+                self.agents["supervisor"] = create_supervisor_agent()
+                logger.info("Supervisor agent initialized successfully")
             except Exception as e:
-                logger.error(f"Failed to initialize day planner agent: {e}")
+                logger.error(f"Failed to initialize supervisor agent: {e}")
+                # Fallback to demo agent if supervisor fails
+                logger.warning("Supervisor failed, adding demo agent")
+                self.agents["demo"] = self._create_demo_agent()
         else:
-            logger.warning(f"Day planner agent not available: {day_planner_error}")
-
-        if GOOGLE_SEARCH_AVAILABLE:
-            try:
-                self.agents["google_search"] = create_google_search_agent()
-                logger.info("Google search agent initialized successfully")
-            except Exception as e:
-                logger.error(f"Failed to initialize Google search agent: {e}")
-        else:
-            logger.warning(f"Google search agent not available: {google_search_error}")
-
-        # Add mock agent if no real agents are available
-        if not self.agents:
+            logger.error(f"Supervisor agent not available: {supervisor_error}")
             self.agents["demo"] = self._create_demo_agent()
-            logger.info("No real agents available, using demo agent")
+            logger.info("Using demo agent as fallback")
 
         logger.info("Chatbot manager initialized with %d agents", len(self.agents))
 
@@ -466,24 +449,12 @@ class ChatbotManager:
 
         return None
 
-    def auto_select_agent(self, message: str) -> str:
-        """Automatically select the best agent based on message content"""
-        message_lower = message.lower()
-
-        # Simple keyword-based routing
-        if "day_planner" in self.agents and any(
-            word in message_lower
-            for word in ["weather", "plan", "day", "activity", "outdoor"]
-        ):
-            return "day_planner"
-        elif "google_search" in self.agents and any(
-            word in message_lower
-            for word in ["search", "find", "google", "research", "fact"]
-        ):
-            return "google_search"
+    def get_primary_agent(self) -> str:
+        """Get the primary agent (supervisor or demo fallback)"""
+        if "supervisor" in self.agents:
+            return "supervisor"
         else:
-            # Return first available agent
-            return next(iter(self.agents.keys())) if self.agents else "demo"
+            return "demo"
 
 
 def initialize_session_state():
@@ -493,13 +464,17 @@ def initialize_session_state():
             {
                 "role": "assistant",
                 "content": (
-                    "👋 Hello! I'm your Home Agent Suite assistant. I can "
-                    "help you with day planning based on weather forecasts "
-                    "and answer questions using web search. How can I "
-                    "assist you today?"
+                    "👋 Hello! I'm your intelligent Home Agent Suite assistant. "
+                    "I can help you with:\n\n"
+                    "🌤️ **Weather & Planning** - Daily forecasts, "
+                    "activity suggestions, optimal timing\n"
+                    "🔍 **Research & Information** - Facts, current events, "
+                    "explanations\n\n"
+                    "Just ask me anything and I'll automatically choose "
+                    "the best approach to help you!"
                 ),
                 "timestamp": datetime.now().isoformat(),
-                "agent": "system",
+                "agent": "supervisor",
             }
         ]
 
@@ -509,8 +484,7 @@ def initialize_session_state():
     else:
         logger.debug("Using existing ChatbotManager from session state")
 
-    if "selected_agent" not in st.session_state:
-        st.session_state.selected_agent = "auto"
+    # No need for agent selection anymore - using supervisor only
 
     if "conversation_id" not in st.session_state:
         st.session_state.conversation_id = f"chat_{int(time.time())}"
@@ -522,30 +496,22 @@ def render_sidebar():
         st.title("🏠 Home Agent Suite")
         st.markdown("---")
 
-        # Agent selection
-        st.subheader("🤖 Agent Selection")
+        # Agent status
+        st.subheader("🤖 Intelligent Agent")
 
-        # Build agent options based on available agents
-        agent_options = {"auto": "🧠 Auto-Select"}
-
-        # Add available agents
-        available_agents = st.session_state.chatbot_manager.agents.keys()
-        for agent_name in available_agents:
-            if agent_name == "day_planner":
-                agent_options[agent_name] = "🗓️ Day Planner"
-            elif agent_name == "google_search":
-                agent_options[agent_name] = "🔍 Google Search"
-            elif agent_name == "demo":
-                agent_options[agent_name] = "🎭 Demo Agent"
-            else:
-                agent_options[agent_name] = f"🤖 {agent_name.replace('_', ' ').title()}"
-
-        st.session_state.selected_agent = st.selectbox(
-            "Choose an agent:",
-            options=list(agent_options.keys()),
-            format_func=lambda x: agent_options[x],
-            index=list(agent_options.keys()).index(st.session_state.selected_agent),
-        )
+        primary_agent = st.session_state.chatbot_manager.get_primary_agent()
+        if primary_agent == "supervisor":
+            st.success("🧠 **Supervisor Agent Active**")
+            st.markdown(
+                """
+            The supervisor agent intelligently routes your queries to:
+            - 🌤️ **Weather & Planning** for forecasts and activities
+            - 🔍 **Web Search** for information and research
+            """
+            )
+        else:
+            st.warning("🎭 **Demo Mode**")
+            st.markdown("Using demo agent - check configuration for full functionality")
 
         st.markdown("---")
 
@@ -694,13 +660,8 @@ def handle_user_input():
         with st.chat_message("assistant", avatar="🤖"):
             show_typing_indicator()
 
-            # Determine which agent to use
-            if st.session_state.selected_agent == "auto":
-                selected_agent = st.session_state.chatbot_manager.auto_select_agent(
-                    prompt
-                )
-            else:
-                selected_agent = st.session_state.selected_agent
+            # Use the primary agent (supervisor or demo)
+            selected_agent = st.session_state.chatbot_manager.get_primary_agent()
 
             # Get response from agent
             response = st.session_state.chatbot_manager.get_agent_response(
