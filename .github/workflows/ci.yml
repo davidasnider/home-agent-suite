@@ -108,7 +108,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    if: github.event_name == 'pull_request' && github.actor == 'davidasnider'
+    if: github.event_name == 'pull_request' && (github.actor == 'davidasnider' || github.actor == 'dependabot[bot]')
     steps:
       - name: Auto approve PR
         uses: hmarr/auto-approve-action@v4
@@ -123,7 +123,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    if: github.event_name == 'pull_request' && github.actor == 'davidasnider'
+    if: github.event_name == 'pull_request' && (github.actor == 'davidasnider' || github.actor == 'dependabot[bot]')
     steps:
       - name: Enable auto-merge for PR
         uses: peter-evans/enable-pull-request-automerge@v3
