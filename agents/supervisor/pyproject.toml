@@ -19,7 +19,7 @@ tomorrow-io-client = { path = "../../libs/tomorrow_io_client", develop = true }
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 pytest-asyncio = "^0.24.0"
-black = "^24.0.0"
+black = "^25.1.0"
 flake8 = "^7.0.0"
 
 [build-system]
