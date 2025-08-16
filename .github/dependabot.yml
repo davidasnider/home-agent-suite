@@ -1,0 +1,63 @@
+version: 2
+updates:
+  # Python dependencies (Poetry) - Root
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "davidasnider"
+    assignees:
+      - "davidasnider"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Individual agent dependencies
+  - package-ecosystem: "pip"
+    directory: "/agents/day_planner"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "pip"
+    directory: "/agents/google_search_agent"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "pip"
+    directory: "/agents/supervisor"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  # Library dependencies
+  - package-ecosystem: "pip"
+    directory: "/libs/tomorrow_io_client"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "pip"
+    directory: "/libs/common_logging"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  # Infrastructure dependencies
+  - package-ecosystem: "pip"
+    directory: "/infrastructure/github"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
