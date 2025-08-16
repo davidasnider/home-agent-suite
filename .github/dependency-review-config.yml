@@ -1,0 +1,24 @@
+# Configuration for dependency review action
+# https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-dependency-review
+
+# Fail the build on these severity levels
+fail_on_severity: high
+
+# License configuration
+allow_licenses:
+  - MIT
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - ISC
+  - GPL-3.0
+
+deny_licenses:
+  - GPL-2.0
+  - LGPL-2.1
+
+# Vulnerability settings
+vulnerability_check: true
+
+# Comment settings
+comment_summary_in_pr: always
