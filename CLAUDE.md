@@ -241,14 +241,14 @@ logger.debug(
 **Execute these commands in order from the repository root:**
 
 ```bash
-# 1. Sync root Poetry environment with exact locked versions
-poetry sync
+# 1. Install root Poetry environment (don't use sync - it removes packages needed by other components)
+poetry install
 
-# 2. Update all component Poetry environments
+# 2. Install all component Poetry environments
 for dir in agents/* libs/* infrastructure/*; do
     if [ -f "$dir/pyproject.toml" ]; then
-        echo "Updating dependencies in $dir"
-        (cd "$dir" && poetry sync)
+        echo "Installing dependencies in $dir"
+        (cd "$dir" && poetry install)
     fi
 done
 
@@ -264,7 +264,7 @@ poetry run pytest --collect-only -q >/dev/null 2>&1 && echo "✅ Environment syn
 **For minor updates or when you're confident only root dependencies changed:**
 
 ```bash
-poetry sync && pre-commit install --install-hooks
+poetry install && pre-commit install --install-hooks
 ```
 
 ### When Lock Files Are Out of Sync
@@ -282,8 +282,8 @@ done
 ```
 
 ### Important Notes
-- **Use `poetry sync`**: This is the newer command (replaced `poetry install --sync`)
-- **Component Independence**: Each agent/library has its own pyproject.toml that may need syncing
+- **Use `poetry install` not `poetry sync`**: In our monorepo, sync removes packages needed by other components since they all share the same virtual environment
+- **Component Independence**: Each agent/library has its own pyproject.toml that may need installing
 - **Pre-commit Hooks**: These are versioned and need updating when .pre-commit-config.yaml changes
 - **Path Dependencies**: Our monorepo structure requires reinstallation of local packages when their dependencies change
 - **Lock File Conflicts**: Dependabot may update lock files that become out of sync with local changes
