@@ -1,0 +1,120 @@
+{
+  "weather_responses": {
+    "new_york_weather": {
+      "status": "success",
+      "forecast": "Today in New York: Morning (72-78°F, partly cloudy), Afternoon (78-82°F, sunny), Evening (74-76°F, clear). Perfect weather for outdoor activities!",
+      "location": "New York, NY",
+      "timestamp": "2025-08-17T10:00:00Z"
+    },
+    "los_angeles_weather": {
+      "status": "success",
+      "forecast": "Today in Los Angeles: Morning (68-75°F, foggy), Afternoon (75-80°F, sunny), Evening (72-74°F, clear). Great day ahead!",
+      "location": "Los Angeles, CA",
+      "timestamp": "2025-08-17T10:00:00Z"
+    },
+    "weather_error": {
+      "status": "error",
+      "error_message": "Weather service temporarily unavailable",
+      "location": "Unknown",
+      "timestamp": "2025-08-17T10:00:00Z"
+    }
+  },
+  "search_responses": {
+    "ai_developments": {
+      "query": "latest AI developments 2025",
+      "results": [
+        {
+          "title": "Major AI Breakthroughs in 2025",
+          "snippet": "Recent advances in multimodal AI systems and reasoning capabilities...",
+          "url": "https://example.com/ai-news-2025"
+        },
+        {
+          "title": "AI Safety Research Progress",
+          "snippet": "New frameworks for AI alignment and safety measures...",
+          "url": "https://example.com/ai-safety-2025"
+        }
+      ],
+      "summary": "Recent AI developments include advanced multimodal systems, improved reasoning, and enhanced safety research."
+    },
+    "search_error": {
+      "query": "failing search query",
+      "error": "Search service temporarily unavailable",
+      "timestamp": "2025-08-17T10:00:00Z"
+    }
+  },
+  "demo_responses": {
+    "greeting": "🤖 Demo Agent Response: I received your message 'Hello!'. This is a demonstration of the chat interface.",
+    "weather_request": "🤖 Demo Agent Response: I received your message 'What's the weather?'. This is a demonstration - real weather data requires API configuration.",
+    "generic": "🤖 Demo Agent Response: I received your message. This is a demonstration of the chat interface. Real agent integration requires proper API keys and configuration."
+  },
+  "error_scenarios": {
+    "agent_timeout": {
+      "error_type": "timeout",
+      "message": "Agent request timed out after 30 seconds",
+      "retry_suggested": true
+    },
+    "api_key_invalid": {
+      "error_type": "authentication",
+      "message": "Invalid API key for weather service",
+      "retry_suggested": false
+    },
+    "rate_limit": {
+      "error_type": "rate_limit",
+      "message": "Rate limit exceeded. Please try again in 60 seconds",
+      "retry_suggested": true,
+      "retry_after": 60
+    },
+    "unknown_error": {
+      "error_type": "unknown",
+      "message": "An unexpected error occurred",
+      "retry_suggested": true
+    }
+  },
+  "session_scenarios": {
+    "new_session": {
+      "session_id": "chat_1629123456",
+      "user_id": "streamlit_user",
+      "created_at": "2025-08-17T10:00:00Z",
+      "events": []
+    },
+    "existing_session": {
+      "session_id": "chat_1629123456",
+      "user_id": "streamlit_user",
+      "created_at": "2025-08-17T09:30:00Z",
+      "events": [
+        {
+          "type": "user_message",
+          "content": "Previous message",
+          "timestamp": "2025-08-17T09:45:00Z"
+        },
+        {
+          "type": "agent_response",
+          "content": "Previous response",
+          "timestamp": "2025-08-17T09:45:30Z"
+        }
+      ]
+    }
+  },
+  "ui_test_data": {
+    "css_classes": [
+      ".stChatMessage",
+      ".stButton",
+      ".typing-indicator",
+      ".typing-dots",
+      "@keyframes typing",
+      "@media (max-width: 768px)"
+    ],
+    "avatars": {
+      "user": "👤",
+      "supervisor": "🤖",
+      "day_planner": "🗓️",
+      "google_search": "🔍",
+      "demo": "🎭"
+    },
+    "timestamps": {
+      "valid_iso": "2025-08-17T10:00:00.000Z",
+      "invalid_format": "invalid-timestamp",
+      "missing_timezone": "2025-08-17T10:00:00"
+    }
+  }
+}
