@@ -93,18 +93,18 @@ if [ "$LOCK_REGEN" = true ]; then
     done
 fi
 
-# Step 2: Sync root Poetry environment
-log_info "Syncing root Poetry environment..."
-if poetry sync; then
+# Step 2: Install root Poetry environment
+log_info "Installing root Poetry environment dependencies..."
+if poetry install; then
     log_success "Root Poetry environment synchronized"
 else
-    log_error "Failed to sync root Poetry environment"
+    log_error "Failed to install root Poetry environment"
     exit 1
 fi
 
-# Step 3: Sync component environments (skip in quick mode)
+# Step 3: Install component environments (skip in quick mode)
 if [ "$QUICK_MODE" = false ]; then
-    log_info "Syncing component Poetry environments..."
+    log_info "Installing component Poetry environments..."
 
     component_count=0
     success_count=0
@@ -112,20 +112,20 @@ if [ "$QUICK_MODE" = false ]; then
     for dir in agents/* libs/* infrastructure/*; do
         if [ -f "$dir/pyproject.toml" ]; then
             component_count=$((component_count + 1))
-            log_info "Updating dependencies in $dir"
+            log_info "Installing dependencies in $dir"
 
-            if (cd "$dir" && poetry sync 2>/dev/null); then
+            if (cd "$dir" && poetry install 2>/dev/null); then
                 success_count=$((success_count + 1))
                 log_success "✓ $dir"
             else
-                log_warning "⚠ Failed to sync $dir (may need manual attention)"
+                log_warning "⚠ Failed to install $dir (may need manual attention)"
             fi
         fi
     done
 
-    log_info "Component sync completed: $success_count/$component_count successful"
+    log_info "Component install completed: $success_count/$component_count successful"
 else
-    log_info "Quick mode: skipping component synchronization"
+    log_info "Quick mode: skipping component installation"
 fi
 
 # Step 4: Update pre-commit hooks
