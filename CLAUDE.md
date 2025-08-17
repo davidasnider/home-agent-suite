@@ -16,6 +16,7 @@ This is a monorepo for a multi-agent home intelligence system built with Google 
 - **Shared Logging**: All components use `common_logging.logging_utils.setup_logging()` for consistent logging
 - **Tool-based Architecture**: Agents use custom tools to interact with external APIs (Tomorrow.io weather, Home Assistant)
 - **Hierarchical Agents**: A supervisor agent delegates tasks to specialized sub-agents
+- **Agent Instructions**: All agent instructions are defined in code within each agent's `agent.py` file, not in separate instruction files
 
 ## Development Workflow
 
@@ -87,12 +88,47 @@ python -m tomorrow_io_client.client
 ## Key Components
 
 ### Agents
-- **Day Planner Agent** (`agents/day_planner/`) - Provides daily planning advice based on weather forecasts
-- **Google Search Agent** (`agents/google_search_agent/`) - Handles web search queries
+- **Supervisor Agent** (`agents/supervisor/`) - Central coordinator that receives user requests and delegates them to appropriate specialist sub-agents using LLM-driven routing
+- **Day Planner Agent** (`agents/day_planner/`) - Provides daily planning advice based on weather forecasts by analyzing hourly weather data to identify optimal outdoor activity windows
+- **Google Search Agent** (`agents/google_search_agent/`) - Handles web search queries for research and information retrieval
 
 ### Shared Libraries
 - **Tomorrow.io Client** (`libs/tomorrow_io_client/`) - Weather API integration with structured response format
 - **Common Logging** (`libs/common_logging/`) - Unified logging setup for local and GCP environments
+
+## Agent Architecture Details
+
+### Supervisor Agent
+- **Type**: `google.adk.agents.LlmAgent`
+- **Role**: Central coordinator for all user requests
+- **Key Logic**: Uses LLM-driven routing based on sub-agent descriptions to determine the correct expert for each task
+- **Agent Definition**: See `instruction` parameter in `agents/supervisor/src/supervisor/agent.py`
+- **Tools Available**: Weather & Planning (Tomorrow.io), Web Search (Google Search)
+
+### Day Planner Agent
+- **Type**: `google.adk.agents.LlmAgent` (Sub-agent to SupervisorAgent)
+- **Role**: Provides daily planning advice based on detailed weather forecasts
+- **Key Logic**: Analyzes hourly weather forecast to identify the most pleasant time windows for outdoor activities
+- **Agent Definition**: See `instruction` parameter in `agents/day_planner/src/day_planner/agent.py`
+- **Input**: Location string (e.g., "New York, NY" or "zip:10001")
+- **Output**: Human-readable summary broken down by morning, afternoon, and evening segments
+
+### Google Search Agent
+- **Type**: `google.adk.agents.LlmAgent` (Sub-agent to SupervisorAgent)
+- **Role**: Handles web search queries for research and information retrieval
+- **Agent Definition**: See `instruction` parameter in `agents/google_search_agent/agent.py`
+
+## Available Tools
+
+### TomorrowIo Tool
+- **Location**: `libs/tomorrow_io_client/`
+- **Purpose**: ADK-compatible tool for fetching and summarizing weather forecasts from Tomorrow.io API
+- **Functionality**:
+  - Calls Tomorrow.io `/v4/weather/forecast` endpoint
+  - Accepts location string as input (e.g., "New York, NY" or "zip:10001")
+  - Processes raw hourly JSON response into human-readable summary
+  - Returns structured format with morning, afternoon, and evening segments
+- **Integration**: Used by Day Planner Agent for weather-based planning advice
 
 ## Code Conventions
 
