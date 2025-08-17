@@ -301,12 +301,10 @@ class ChatbotManager:
                                     session_id=session_id,
                                 )
                                 # Get the newly created session
-                                existing_session = (
-                                    await runner.session_service.get_session(
-                                        app_name=agent_name,
-                                        user_id=user_id,
-                                        session_id=session_id,
-                                    )
+                                await runner.session_service.get_session(
+                                    app_name=agent_name,
+                                    user_id=user_id,
+                                    session_id=session_id,
                                 )
                             except Exception as create_error:
                                 logger.error(
