@@ -1,0 +1,135 @@
+{
+  "successful_weather_search": {
+    "status": "success",
+    "results": [
+      {
+        "title": "Weather Today - Local Forecast",
+        "url": "https://weather.example.com/today",
+        "snippet": "Today's weather forecast shows sunny skies with a high of 75°F and low of 60°F. Perfect day for outdoor activities with light winds from the southwest."
+      },
+      {
+        "title": "Current Weather Conditions",
+        "url": "https://example.com/weather/current",
+        "snippet": "Real-time weather data shows clear conditions with light winds. Temperature is currently 68°F with humidity at 45%."
+      },
+      {
+        "title": "Extended Weather Forecast",
+        "url": "https://weather.service.com/7day",
+        "snippet": "7-day forecast indicates mostly sunny conditions through the weekend with temperatures in the mid-70s."
+      }
+    ],
+    "search_metadata": {
+      "query": "weather today",
+      "total_results": 847000,
+      "search_time": 0.45,
+      "safe_search": "active"
+    }
+  },
+  "successful_tech_search": {
+    "status": "success",
+    "results": [
+      {
+        "title": "Latest Technology News - TechCrunch",
+        "url": "https://techcrunch.com/latest",
+        "snippet": "Breaking technology news, analysis, and insights from the world of startups, venture capital, and emerging technologies."
+      },
+      {
+        "title": "AI Advances in 2024",
+        "url": "https://example.com/ai-2024",
+        "snippet": "Artificial intelligence continues to transform industries with new breakthroughs in machine learning and natural language processing."
+      }
+    ],
+    "search_metadata": {
+      "query": "latest technology news",
+      "total_results": 1200000,
+      "search_time": 0.32
+    }
+  },
+  "empty_search_results": {
+    "status": "success",
+    "results": [],
+    "search_metadata": {
+      "query": "very_specific_nonexistent_query_12345",
+      "total_results": 0,
+      "search_time": 0.12
+    }
+  },
+  "api_quota_error": {
+    "status": "error",
+    "error_message": "API quota exceeded. Please try again later.",
+    "error_code": "QUOTA_EXCEEDED",
+    "retry_after": 3600
+  },
+  "network_timeout_error": {
+    "status": "error",
+    "error_message": "Request timed out after 30 seconds.",
+    "error_code": "TIMEOUT",
+    "timeout_duration": 30
+  },
+  "invalid_query_error": {
+    "status": "error",
+    "error_message": "Invalid search query. Query cannot be empty or contain only special characters.",
+    "error_code": "INVALID_QUERY"
+  },
+  "api_key_error": {
+    "status": "error",
+    "error_message": "Invalid API key or authentication failed.",
+    "error_code": "AUTH_ERROR"
+  },
+  "partial_response": {
+    "status": "success",
+    "results": [
+      {
+        "title": "Partial Result 1",
+        "url": "https://example.com/partial1"
+      },
+      {
+        "title": "Partial Result 2",
+        "snippet": "This result has no URL field"
+      },
+      {
+        "url": "https://example.com/notitle",
+        "snippet": "This result has no title field"
+      }
+    ],
+    "search_metadata": {
+      "query": "partial data test",
+      "total_results": 3
+    }
+  },
+  "large_response": {
+    "status": "success",
+    "results": [
+      {
+        "title": "Result 1 - Very Long Title That Exceeds Normal Length Limits And Contains Multiple Words And Phrases To Test Text Handling",
+        "url": "https://example.com/result1",
+        "snippet": "This is a very long snippet that contains multiple sentences and a lot of information. It should test how the system handles large amounts of text data from search results. The snippet continues with more detailed information about the topic being searched, providing comprehensive coverage of the subject matter."
+      },
+      {
+        "title": "Result 2",
+        "url": "https://example.com/result2",
+        "snippet": "Another long snippet with detailed information and multiple sentences."
+      }
+    ],
+    "search_metadata": {
+      "query": "large response test",
+      "total_results": 2,
+      "search_time": 1.25
+    }
+  },
+  "malformed_response": {
+    "status": "success",
+    "results": [
+      {
+        "title": null,
+        "url": "",
+        "snippet": "Valid snippet but other fields are problematic"
+      },
+      "invalid_result_format",
+      {
+        "unexpected_field": "unexpected_value"
+      }
+    ],
+    "search_metadata": null
+  }
+}
