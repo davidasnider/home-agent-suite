@@ -483,14 +483,23 @@ def test_debug_execution_success(requests_mock, sample_response):
     """Test the debug block execution when module is run directly"""
     import subprocess
     import sys
+    import os
 
     # Mock successful API response for the debug execution
     requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
 
+    # Find the src directory relative to current test location
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    src_dir = os.path.join(os.path.dirname(test_dir), "src")
+
+    # Skip test if src directory doesn't exist (e.g., in CI with different structure)
+    if not os.path.exists(src_dir):
+        pytest.skip("Source directory not found - skipping subprocess test")
+
     # Execute the module directly to trigger the debug block
     result = subprocess.run(
         [sys.executable, "-m", "tomorrow_io_client.client"],
-        cwd="/home/david/code/home-agent-suite/libs/tomorrow_io_client/src",
+        cwd=src_dir,
         capture_output=True,
         text=True,
         env={"TOMORROW_IO_API_KEY": MOCK_API_KEY},
@@ -504,16 +513,25 @@ def test_debug_execution_api_error(requests_mock):
     """Test the debug block execution with API error"""
     import subprocess
     import sys
+    import os
 
     # Mock API error response for the debug execution
     requests_mock.get(
         MOCK_URL, exc=requests.exceptions.ConnectionError("Connection failed")
     )
 
+    # Find the src directory relative to current test location
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    src_dir = os.path.join(os.path.dirname(test_dir), "src")
+
+    # Skip test if src directory doesn't exist (e.g., in CI with different structure)
+    if not os.path.exists(src_dir):
+        pytest.skip("Source directory not found - skipping subprocess test")
+
     # Execute the module directly to trigger the debug block
     result = subprocess.run(
         [sys.executable, "-m", "tomorrow_io_client.client"],
-        cwd="/home/david/code/home-agent-suite/libs/tomorrow_io_client/src",
+        cwd=src_dir,
         capture_output=True,
         text=True,
         env={"TOMORROW_IO_API_KEY": MOCK_API_KEY},
