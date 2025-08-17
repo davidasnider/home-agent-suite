@@ -26,6 +26,7 @@ try:
 
     load_dotenv()
 except ImportError:
+    # dotenv is optional for production deployments
     pass
 
 # Import supervisor agent
