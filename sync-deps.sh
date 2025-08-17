@@ -82,7 +82,7 @@ done
 # Step 1: Regenerate lock files if requested
 if [ "$LOCK_REGEN" = true ]; then
     log_info "Regenerating lock files for components with out-of-sync dependencies..."
-    
+
     for dir in agents/* libs/* infrastructure/*; do
         if [ -f "$dir/pyproject.toml" ]; then
             log_info "Checking lock file in $dir"
@@ -105,15 +105,15 @@ fi
 # Step 3: Sync component environments (skip in quick mode)
 if [ "$QUICK_MODE" = false ]; then
     log_info "Syncing component Poetry environments..."
-    
+
     component_count=0
     success_count=0
-    
+
     for dir in agents/* libs/* infrastructure/*; do
         if [ -f "$dir/pyproject.toml" ]; then
             component_count=$((component_count + 1))
             log_info "Updating dependencies in $dir"
-            
+
             if (cd "$dir" && poetry sync 2>/dev/null); then
                 success_count=$((success_count + 1))
                 log_success "✓ $dir"
@@ -122,7 +122,7 @@ if [ "$QUICK_MODE" = false ]; then
             fi
         fi
     done
-    
+
     log_info "Component sync completed: $success_count/$component_count successful"
 else
     log_info "Quick mode: skipping component synchronization"
@@ -145,7 +145,7 @@ fi
 # Step 5: Verify environment (optional)
 if [ "$SKIP_VERIFY" = false ]; then
     log_info "Verifying environment integrity..."
-    
+
     if poetry run pytest --collect-only -q >/dev/null 2>&1; then
         log_success "✅ Environment sync successful - all tests discoverable"
     else
