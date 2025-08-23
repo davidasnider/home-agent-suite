@@ -173,15 +173,9 @@ class TestMainFunction:
 class TestSessionState:
     """Test session state functions."""
 
-    # Note: Session state test is complex due to Streamlit's internal structure
-    # This test is commented out but demonstrates the testing approach
-    # @patch("app.ChatbotManager")
-    # @patch("time.time", return_value=1629123456.0)
-    # def test_initialize_session_state(self, mock_time, mock_chatbot_manager):
-    #     """Test session state initialization."""
-    #     from app import initialize_session_state
-    #     # Complex mocking required for Streamlit session state
-    #     pass
+    # Note: Session state testing is complex due to Streamlit's internal structure
+    # Would require extensive mocking of st.session_state and ChatbotManager
+    pass
 
 
 class TestChatInterface:
