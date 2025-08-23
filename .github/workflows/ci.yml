@@ -65,6 +65,20 @@ jobs:
   testing:
     name: Unit Tests
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite:
+          - name: "Day Planner"
+            path: "agents/day_planner"
+          - name: "Google Search Agent"
+            path: "agents/google_search_agent"
+          - name: "Supervisor"
+            path: "agents/supervisor"
+          - name: "Common Logging"
+            path: "libs/common_logging"
+          - name: "Tomorrow.io Client"
+            path: "libs/tomorrow_io_client"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -87,19 +101,14 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Install project packages
         run: poetry install --no-interaction
-      - name: Run Unit Tests
+      - name: Run ${{ matrix.test-suite.name }} Tests
         run: |
-          # Run tests in each library/agent directory that has tests
-          for test_dir in $(find . -name "tests" -type d | grep -E "(libs|agents)"); do
-            project_dir=$(dirname "$test_dir")
-            echo "Running tests in $project_dir"
-            cd "$project_dir"
-            poetry install  # Install dependencies for this library
-            # Set fake environment variables for testing (no real secrets)
-            export TOMORROW_IO_API_KEY="fake_api_key_for_testing"
-            poetry run pytest
-            cd - > /dev/null
-          done
+          echo "Running tests for ${{ matrix.test-suite.name }}"
+          cd "${{ matrix.test-suite.path }}"
+          poetry install  # Install dependencies for this component
+          # Set fake environment variables for testing (no real secrets)
+          export TOMORROW_IO_API_KEY="fake_api_key_for_testing"
+          poetry run pytest
 
   auto-approve:
     name: Auto Approve PR
