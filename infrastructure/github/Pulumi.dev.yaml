@@ -15,5 +15,9 @@ config:
   github-management:status_check_contexts:
     - "Code Formatting"
     - "Code Linting"
-    - "Unit Tests"
+    - "Unit Tests (Day Planner)"
+    - "Unit Tests (Google Search Agent)"
+    - "Unit Tests (Supervisor)"
+    - "Unit Tests (Common Logging)"
+    - "Unit Tests (Tomorrow.io Client)"
   github-management:delete_branch_on_merge: "true"
