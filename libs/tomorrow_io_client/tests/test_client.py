@@ -1,5 +1,6 @@
 import pytest
 import requests
+import tomorrow_io_client.client as client_module
 from tomorrow_io_client.client import get_tmrw_weather_tool
 from datetime import datetime, timezone
 
@@ -368,15 +369,9 @@ def test_empty_temperature_data(requests_mock):
     """Test when temperature data is missing - covers line 145"""
     local_tz = datetime.now().astimezone().tzinfo
     local_now = datetime.now(local_tz)
-    target_local_time = local_now.replace(hour=8, minute=0, second=0, microsecond=0)
-    target_utc_time = target_local_time.astimezone(timezone.utc)
-
-    # Data with no temperature field - but this will default to 0 in the code
-    # To trigger line 145 (when temps list is empty), we need no matching data at all
-    # Use an hour outside the tracked periods
-    target_local_time = local_now.replace(
-        hour=2, minute=0, second=0, microsecond=0
-    )  # 2 AM is outside all periods
+    # Use an hour outside the tracked periods to trigger empty temperature data
+    # 2 AM is outside all periods
+    target_local_time = local_now.replace(hour=2, minute=0, second=0, microsecond=0)
     target_utc_time = target_local_time.astimezone(timezone.utc)
 
     no_temp_response = {
@@ -546,9 +541,6 @@ def test_main_block_execution(requests_mock, sample_response, monkeypatch):
     # Mock the API response
     requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
 
-    # Import the client module
-    import tomorrow_io_client.client as client_module
-
     # Mock __name__ to be "__main__" to trigger the debug block
     with monkeypatch.context() as m:
         m.setattr(client_module, "__name__", "__main__")
@@ -581,9 +573,6 @@ def test_main_block_with_api_error(requests_mock, monkeypatch):
     requests_mock.get(
         MOCK_URL, exc=requests.exceptions.ConnectionError("Connection failed")
     )
-
-    # Import the client module
-    import tomorrow_io_client.client as client_module
 
     # Mock __name__ to be "__main__" to trigger the debug block
     with monkeypatch.context() as m:
