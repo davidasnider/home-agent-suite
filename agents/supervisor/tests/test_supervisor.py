@@ -23,9 +23,9 @@ def test_supervisor_agent_has_weather_tool():
     """Test that supervisor agent has weather tool"""
     agent = create_supervisor_agent()
 
-    # Check for day_planner_agent within FunctionTool objects
+    # Check for day_planner_agent within AgentTool objects
     assert any(
-        "day_planner" in tool.func.__name__
+        hasattr(tool, "agent") and "day_planner" in tool.agent.name.lower()
         for tool in agent.tools
     )
 
@@ -34,9 +34,9 @@ def test_supervisor_agent_has_search_tool():
     """Test that supervisor agent has search tool"""
     agent = create_supervisor_agent()
 
-    # Check for search_agent within FunctionTool objects
+    # Check for search_agent within AgentTool objects
     assert any(
-        "search" in tool.func.__name__
+        hasattr(tool, "agent") and "search" in tool.agent.name.lower()
         for tool in agent.tools
     )
 

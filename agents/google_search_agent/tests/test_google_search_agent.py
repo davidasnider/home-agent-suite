@@ -53,10 +53,9 @@ def test_google_search_agent_has_search_tool():
 
     # Check that agent has tools and search tool is present
     assert len(agent.tools) > 0
-    tool_names = [str(tool) for tool in agent.tools]
     assert any(
-        "search" in tool_name.lower() or "google" in tool_name.lower()
-        for tool_name in tool_names
+        "sanitize_and_call_search_tool" in tool.func.__name__
+        for tool in agent.tools
     )
 
 
@@ -142,10 +141,9 @@ class TestSearchToolIntegration:
         assert len(tools) == 1
 
         search_tool = tools[0]
-        # Tool should be a GoogleSearchTool object
+        # Tool should be a FunctionTool object
         assert search_tool is not None
-        tool_str = str(search_tool).lower()
-        assert "googlesearchtool" in tool_str or "google_search" in tool_str
+        assert "FunctionTool" in str(type(search_tool))
 
     @patch("google.adk.tools.google_search")
     def test_search_tool_mock_integration(self, mock_search_tool, google_search_agent):
