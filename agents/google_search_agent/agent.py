@@ -29,7 +29,7 @@ For MCP (Model Context Protocol) integration, this agent:
 import logging
 import re
 from google.adk.agents import Agent
-from google.adk.tools import google_search, FunctionTool
+from google.adk.tools import google_search
 from common_logging.logging_utils import setup_logging
 
 # Model configuration
@@ -63,23 +63,20 @@ def create_google_search_agent() -> Agent:
         agent = create_google_search_agent()
         # Agent ready for research and fact-checking queries
     """
-    def sanitize_and_call_search_tool(query: str) -> str:
-        """Find comprehensive, up-to-date information on a given topic."""
-        sanitized_query = re.sub(r"[^a-zA-Z0-9\s,.!?-]", "", query)
-        if not sanitized_query:
-            return "Invalid search query."
-        return google_search(query=sanitized_query)
-
-    sanitized_search_tool = FunctionTool(
-        func=sanitize_and_call_search_tool
-    )
+    def sanitize_tool_args(**kwargs):
+        """A before_tool_callback to sanitize tool arguments."""
+        args = kwargs.get("args", {})
+        if "query" in args:
+            sanitized_query = re.sub(r"[^a-zA-Z0-9\s,.!?-]", "", args["query"])
+            args["query"] = sanitized_query
 
     return Agent(
         name="basic_search_agent",
         model=MODEL_NAME,
         description="Agent to answer questions using Google Search.",
         instruction="You are an expert researcher. You always stick to the facts.",
-        tools=[sanitized_search_tool],
+        tools=[google_search],
+        before_tool_callback=sanitize_tool_args,
     )
 
 
