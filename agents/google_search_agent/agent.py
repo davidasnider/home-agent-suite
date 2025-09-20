@@ -63,6 +63,7 @@ def create_google_search_agent() -> Agent:
         agent = create_google_search_agent()
         # Agent ready for research and fact-checking queries
     """
+
     def sanitize_tool_args(**kwargs):
         """A before_tool_callback to sanitize tool arguments."""
         args = kwargs.get("args", {})

@@ -53,10 +53,7 @@ def test_google_search_agent_has_search_tool():
 
     # Check that agent has tools and search tool is present
     assert len(agent.tools) > 0
-    assert any(
-        "GoogleSearchTool" in str(type(tool))
-        for tool in agent.tools
-    )
+    assert any("GoogleSearchTool" in str(type(tool)) for tool in agent.tools)
 
 
 def test_google_search_agent_description():

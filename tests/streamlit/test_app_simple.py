@@ -306,13 +306,17 @@ class TestUserInput:
     ):
         """Test that rate limiting prevents frequent requests."""
         import time
+
         mock_session_state.last_request_time = time.time()
         mock_chat_input.return_value = "Test message"
 
         from app import handle_user_input
+
         handle_user_input()
 
-        mock_toast.assert_called_once_with("You are sending requests too quickly. Please wait a moment.")
+        mock_toast.assert_called_once_with(
+            "You are sending requests too quickly. Please wait a moment."
+        )
 
     @patch("streamlit.session_state")
     @patch("streamlit.chat_input")
@@ -325,9 +329,12 @@ class TestUserInput:
         mock_chat_input.return_value = "a" * 1025
 
         from app import handle_user_input
+
         handle_user_input()
 
-        mock_toast.assert_called_once_with("Error: Input is too long. Please limit your query to 1024 characters.")
+        mock_toast.assert_called_once_with(
+            "Error: Input is too long. Please limit your query to 1024 characters."
+        )
 
     @patch("streamlit.session_state")
     @patch("streamlit.chat_input")
@@ -350,6 +357,7 @@ class TestUserInput:
         mock_chat_message.return_value.__exit__ = Mock(return_value=None)
 
         from app import handle_user_input
+
         handle_user_input()
 
         # Check that the sanitized message is passed to the agent

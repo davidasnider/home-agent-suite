@@ -655,14 +655,16 @@ def handle_user_input():
 
         # UTF-8 Encoding validation
         try:
-            prompt.encode('utf-8').decode('utf-8')
+            prompt.encode("utf-8").decode("utf-8")
         except UnicodeDecodeError:
             st.toast("Error: Invalid input encoding. Please use UTF-8.")
             return
 
         # Validate and sanitize user input
         if len(prompt) > 1024:
-            st.toast("Error: Input is too long. Please limit your query to 1024 characters.")
+            st.toast(
+                "Error: Input is too long. Please limit your query to 1024 characters."
+            )
             return
 
         # Sanitize input to prevent injection attacks

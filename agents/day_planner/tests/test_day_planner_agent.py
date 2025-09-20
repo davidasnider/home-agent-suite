@@ -49,10 +49,7 @@ def test_day_planner_agent_has_weather_tool():
 
     # Check that agent has tools and weather tool is present
     assert len(agent.tools) > 0
-    assert any(
-        "get_tmrw_weather_tool" in tool.__name__
-        for tool in agent.tools
-    )
+    assert any("get_tmrw_weather_tool" in tool.__name__ for tool in agent.tools)
 
 
 def test_day_planner_agent_description():

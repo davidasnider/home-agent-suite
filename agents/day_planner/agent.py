@@ -152,6 +152,7 @@ def _before_tool_debug(**kwargs):
     if args:
         logger.debug(f"🔧 Tool arguments: {args}")
 
+
 def sanitize_tool_args(**kwargs):
     """A before_tool_callback to sanitize tool arguments."""
     args = kwargs.get("args", {})
