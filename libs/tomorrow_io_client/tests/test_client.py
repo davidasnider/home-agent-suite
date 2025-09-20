@@ -4,7 +4,7 @@ import tomorrow_io_client.client as client_module
 from tomorrow_io_client.client import get_tmrw_weather_tool
 from datetime import datetime, timezone
 
-MOCK_API_KEY = "test_api_key"
+MOCK_API_KEY = "dummy_api_key_for_testing_purposes_1234567890"
 MOCK_LOCATION = "New York, NY"
 MOCK_URL = "https://api.tomorrow.io/v4/weather/forecast"
 

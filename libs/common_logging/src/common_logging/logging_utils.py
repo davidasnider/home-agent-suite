@@ -22,8 +22,31 @@ For MCP and agentic AI systems, this module:
 
 import logging
 import os
-
+import re
 from typing import Optional
+
+
+class RedactingFilter(logging.Filter):
+    """A logging filter that redacts sensitive information."""
+
+    def __init__(self, patterns, name: str = ""):
+        super().__init__(name)
+        self._patterns = [(re.compile(p), "[REDACTED]") for p in patterns]
+
+    def filter(self, record):
+        record.msg = self._redact(record.msg)
+        if isinstance(record.args, dict):
+            for k in record.args.keys():
+                record.args[k] = self._redact(record.args[k])
+        else:
+            record.args = tuple(self._redact(arg) for arg in record.args)
+        return True
+
+    def _redact(self, msg):
+        if isinstance(msg, str):
+            for pattern, repl in self._patterns:
+                msg = pattern.sub(repl, msg)
+        return msg
 
 
 def setup_logging(service_name: Optional[str] = None, cloud: Optional[bool] = None):
@@ -78,6 +101,13 @@ def setup_logging(service_name: Optional[str] = None, cloud: Optional[bool] = No
 
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
+
+    # Add redacting filter
+    redaction_patterns = [
+        r"'tomorrow_io_api_key': '[^']+'",
+        r"\"apikey\": \"[^\"]+\"",
+    ]
+    logger.addFilter(RedactingFilter(patterns=redaction_patterns))
 
     # Remove default handlers
     for h in logger.handlers[:]:

@@ -32,6 +32,7 @@ from datetime import datetime, timezone
 import re
 import requests
 import tzlocal
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from common_logging.logging_utils import setup_logging
 
@@ -43,11 +44,17 @@ logger = logging.getLogger(__name__)
 class Settings(BaseSettings):
     """Configuration settings for the Tomorrow.io weather API client."""
 
-    tomorrow_io_api_key: str
+    tomorrow_io_api_key: SecretStr
     base_url: str = "https://api.tomorrow.io/v4/weather/forecast"
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
+    @field_validator("tomorrow_io_api_key")
+    def validate_api_key(cls, v):
+        if len(v.get_secret_value()) < 32:
+            raise ValueError("Invalid Tomorrow.io API key format")
+        return v
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -106,7 +113,7 @@ def get_tmrw_weather_tool(location: str) -> dict:
         "location": sanitized_location,
         "timesteps": "1h",
         "units": "imperial",
-        "apikey": settings.tomorrow_io_api_key,
+        "apikey": settings.tomorrow_io_api_key.get_secret_value(),
     }
     try:
         logger.info("Requesting weather summary for location: %s", location)
