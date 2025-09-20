@@ -29,6 +29,7 @@ For MCP and agentic AI systems, this client:
 """
 
 from datetime import datetime, timezone
+import re
 import requests
 import tzlocal
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -83,8 +84,26 @@ def get_tmrw_weather_tool(location: str) -> dict:
             "location": "New York, NY"
         }
     """
+    # Validate and sanitize location input
+    if len(location) > 256:
+        return {
+            "status": "error",
+            "error_message": "Location input is too long.",
+            "location": location,
+            "forecast": None,
+        }
+
+    sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
+    if not sanitized_location:
+        return {
+            "status": "error",
+            "error_message": "Invalid location input.",
+            "location": location,
+            "forecast": None,
+        }
+
     params = {
-        "location": location,
+        "location": sanitized_location,
         "timesteps": "1h",
         "units": "imperial",
         "apikey": settings.tomorrow_io_api_key,
