@@ -29,7 +29,6 @@ For MCP (Model Context Protocol) integration, this agent:
 import logging
 import re
 from google.adk.agents import Agent
-from google.adk.tools import FunctionTool
 from .prompt import instruction as agent_instruction
 from tomorrow_io_client.client import get_tmrw_weather_tool
 from common_logging.logging_utils import setup_logging
@@ -153,6 +152,13 @@ def _before_tool_debug(**kwargs):
     if args:
         logger.debug(f"🔧 Tool arguments: {args}")
 
+def sanitize_tool_args(**kwargs):
+    """A before_tool_callback to sanitize tool arguments."""
+    args = kwargs.get("args", {})
+    if "location" in args:
+        sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", args["location"])
+        args["location"] = sanitized_location
+
 
 def _after_tool_debug(**kwargs):
     """Debug callback after tool is called"""
@@ -199,31 +205,19 @@ def create_day_planner_agent() -> Agent:
         "🔧 Adding debug callbacks: before_model, after_model, before_tool, after_tool"
     )
 
-    def sanitize_and_call_weather_tool(location: str) -> dict:
-        """Get a daily weather summary for a specified location."""
-        sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
-        if not sanitized_location:
-            return {
-                "status": "error",
-                "error_message": "Invalid location input.",
-                "location": location,
-                "forecast": None,
-            }
-        return get_tmrw_weather_tool(location=sanitized_location)
-
-    sanitized_weather_tool = FunctionTool(
-        func=sanitize_and_call_weather_tool
-    )
+    def combined_before_tool_callback(**kwargs):
+        _before_tool_debug(**kwargs)
+        sanitize_tool_args(**kwargs)
 
     agent = Agent(
         name="day_planner_agent",
         model=MODEL_NAME,
         description="Helps users plan their day with weather insights.",
         instruction=agent_instruction,
-        tools=[sanitized_weather_tool],
+        tools=[get_tmrw_weather_tool],
         before_model_callback=_before_model_debug,
         after_model_callback=_after_model_debug,
-        before_tool_callback=_before_tool_debug,
+        before_tool_callback=combined_before_tool_callback,
         after_tool_callback=_after_tool_debug,
     )
 

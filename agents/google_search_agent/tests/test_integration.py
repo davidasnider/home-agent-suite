@@ -217,10 +217,10 @@ class TestADKFrameworkIntegration:
         assert len(tools) == 1
 
         search_tool = tools[0]
-        # Tool should be a FunctionTool object
+        # Tool should be a GoogleSearchTool object
         assert search_tool is not None
         assert hasattr(search_tool, "__class__")
-        assert "FunctionTool" in str(type(search_tool))
+        assert "GoogleSearchTool" in str(type(search_tool))
 
     def test_agent_instantiation_patterns(self):
         """Test different agent instantiation patterns"""
