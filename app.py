@@ -18,6 +18,7 @@ import streamlit as st
 import time
 import json
 import logging
+import html
 from datetime import datetime
 
 # Load environment variables
@@ -488,6 +489,9 @@ def initialize_session_state():
     if "conversation_id" not in st.session_state:
         st.session_state.conversation_id = f"chat_{int(time.time())}"
 
+    if "last_request_time" not in st.session_state:
+        st.session_state.last_request_time = 0
+
 
 def render_sidebar():
     """Render the sidebar with settings and controls"""
@@ -642,10 +646,34 @@ def render_chat_interface():
 def handle_user_input():
     """Handle user input and generate response"""
     if prompt := st.chat_input("Type your message here..."):
+        # Rate limiting
+        current_time = time.time()
+        if current_time - st.session_state.last_request_time < 3:
+            st.toast("You are sending requests too quickly. Please wait a moment.")
+            return
+        st.session_state.last_request_time = current_time
+
+        # UTF-8 Encoding validation
+        try:
+            prompt.encode("utf-8").decode("utf-8")
+        except UnicodeDecodeError:
+            st.toast("Error: Invalid input encoding. Please use UTF-8.")
+            return
+
+        # Validate and sanitize user input
+        if len(prompt) > 1024:
+            st.toast(
+                "Error: Input is too long. Please limit your query to 1024 characters."
+            )
+            return
+
+        # Sanitize input to prevent injection attacks
+        sanitized_prompt = html.escape(prompt)
+
         # Add user message to chat
         user_message = {
             "role": "user",
-            "content": prompt,
+            "content": sanitized_prompt,
             "timestamp": datetime.now().isoformat(),
             "agent": "user",
         }
@@ -653,7 +681,7 @@ def handle_user_input():
 
         # Display user message
         with st.chat_message("user", avatar="👤"):
-            st.markdown(prompt)
+            st.markdown(sanitized_prompt)
 
         # Show typing indicator
         with st.chat_message("assistant", avatar="🤖"):
@@ -664,7 +692,7 @@ def handle_user_input():
 
             # Get response from agent
             response = st.session_state.chatbot_manager.get_agent_response(
-                selected_agent, prompt
+                selected_agent, sanitized_prompt
             )
 
             # Display response
