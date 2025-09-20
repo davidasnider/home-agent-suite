@@ -15,8 +15,9 @@ Key Features:
 """
 
 import logging
+import re
 from google.adk.agents import Agent
-from google.adk.tools import agent_tool
+from google.adk.tools import agent_tool, FunctionTool
 
 # Import dependencies using sys.path until agents are proper packages
 import sys
@@ -44,6 +45,16 @@ setup_logging(service_name="supervisor_agent")
 logger = logging.getLogger(__name__)
 
 logger.info("Initializing Supervisor Agent")
+
+
+def sanitize_input(query: str) -> str:
+    """Sanitize the input query to allow a safe set of characters."""
+    # Allow letters, numbers, spaces, and basic punctuation
+    sanitized_query = re.sub(r"[^a-zA-Z0-9\s,.!?-]", "", query)
+    if not sanitized_query:
+        # If the query is empty after sanitization, return a safe default
+        return "invalid input"
+    return sanitized_query
 
 
 def create_supervisor_agent() -> Agent:
@@ -119,8 +130,26 @@ def create_supervisor_agent() -> Agent:
     search_agent = create_google_search_agent()
 
     # Wrap sub-agents as tools using AgentTool
-    day_planner_tool = agent_tool.AgentTool(agent=day_planner_agent)
-    search_tool = agent_tool.AgentTool(agent=search_agent)
+    day_planner_agent_tool = agent_tool.AgentTool(agent=day_planner_agent)
+    search_agent_tool = agent_tool.AgentTool(agent=search_agent)
+
+    def day_planner_func(query: str) -> str:
+        sanitized_query = sanitize_input(query)
+        return day_planner_agent_tool(query=sanitized_query)
+
+    def search_func(query: str) -> str:
+        sanitized_query = sanitize_input(query)
+        return search_agent_tool(query=sanitized_query)
+
+    sanitized_day_planner = FunctionTool(
+        func=day_planner_func
+    )
+    sanitized_day_planner.description = "Get weather and activity plans. Use for weather, daily planning, and location-based recommendations."
+
+    sanitized_search = FunctionTool(
+        func=search_func
+    )
+    sanitized_search.description = "Find general information and do research. Use for facts, current events, and explanations."
 
     agent = Agent(
         name="supervisor_agent",
@@ -130,7 +159,7 @@ def create_supervisor_agent() -> Agent:
             "specialized capabilities"
         ),
         instruction=supervisor_instruction,
-        tools=[day_planner_tool, search_tool],
+        tools=[sanitized_day_planner, sanitized_search],
     )
 
     logger.info(f"Supervisor agent created with {len(agent.tools)} tools")
