@@ -52,8 +52,13 @@ class Settings(BaseSettings):
 
     @field_validator("tomorrow_io_api_key")
     def validate_api_key(cls, v):
-        if len(v.get_secret_value()) < 32:
-            raise ValueError("Invalid Tomorrow.io API key format")
+        api_key = v.get_secret_value()
+        if not re.match(r"^[a-zA-Z0-9_]{32,}$", api_key):
+            raise ValueError(
+                "Invalid Tomorrow.io API key format. "
+                "Key must be at least 32 characters and contain only "
+                "alphanumeric characters and underscores."
+            )
         return v
 
     def __init__(self, **kwargs):
