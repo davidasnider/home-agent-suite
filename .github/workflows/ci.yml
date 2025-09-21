@@ -107,7 +107,7 @@ jobs:
           cd "${{ matrix.test-suite.path }}"
           poetry install  # Install dependencies for this component
           # Set fake environment variables for testing (no real secrets)
-          export TOMORROW_IO_API_KEY="fake_api_key_for_testing"
+          export TOMORROW_IO_API_KEY="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
           poetry run pytest
 
   auto-approve:
