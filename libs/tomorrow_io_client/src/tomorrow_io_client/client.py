@@ -29,8 +29,10 @@ For MCP and agentic AI systems, this client:
 """
 
 from datetime import datetime, timezone
+import re
 import requests
 import tzlocal
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from common_logging.logging_utils import setup_logging
 
@@ -42,11 +44,22 @@ logger = logging.getLogger(__name__)
 class Settings(BaseSettings):
     """Configuration settings for the Tomorrow.io weather API client."""
 
-    tomorrow_io_api_key: str
+    tomorrow_io_api_key: SecretStr
     base_url: str = "https://api.tomorrow.io/v4/weather/forecast"
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
+    @field_validator("tomorrow_io_api_key")
+    def validate_api_key(cls, v):
+        api_key = v.get_secret_value()
+        if not re.match(r"^[a-zA-Z0-9_]{32,}$", api_key):
+            raise ValueError(
+                "Invalid Tomorrow.io API key format. "
+                "Key must be at least 32 characters and contain only "
+                "alphanumeric characters and underscores."
+            )
+        return v
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -83,11 +96,29 @@ def get_tmrw_weather_tool(location: str) -> dict:
             "location": "New York, NY"
         }
     """
+    # Validate and sanitize location input
+    if len(location) > 256:
+        return {
+            "status": "error",
+            "error_message": "Location input is too long.",
+            "location": location,
+            "forecast": None,
+        }
+
+    sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
+    if not sanitized_location:
+        return {
+            "status": "error",
+            "error_message": "Invalid location input.",
+            "location": location,
+            "forecast": None,
+        }
+
     params = {
-        "location": location,
+        "location": sanitized_location,
         "timesteps": "1h",
         "units": "imperial",
-        "apikey": settings.tomorrow_io_api_key,
+        "apikey": settings.tomorrow_io_api_key.get_secret_value(),
     }
     try:
         logger.info("Requesting weather summary for location: %s", location)

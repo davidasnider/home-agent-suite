@@ -15,3 +15,10 @@ pycache/
 
 # Build artifacts
 **/*.egg-info/
+
+# Coverage reports
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
