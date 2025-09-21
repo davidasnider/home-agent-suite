@@ -23,7 +23,6 @@ from day_planner.agent import (  # noqa: E402
     _after_model_debug,
     _before_tool_debug,
     _after_tool_debug,
-    root_agent,
 )  # noqa: E402
 
 
@@ -81,14 +80,6 @@ def test_day_planner_agent_callbacks_configured():
     assert callable(agent.after_model_callback)
     assert callable(agent.before_tool_callback)
     assert callable(agent.after_tool_callback)
-
-
-def test_root_agent_instance():
-    """Test that root_agent is properly initialized"""
-    assert root_agent is not None
-    assert root_agent.name == "day_planner_agent"
-    assert root_agent.model == MODEL_NAME
-    assert len(root_agent.tools) == 1
 
 
 class TestDebugCallbacks:

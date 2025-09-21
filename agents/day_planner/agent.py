@@ -228,11 +228,3 @@ def create_day_planner_agent() -> Agent:
         logger.debug(f"🔧 Tool {i}: {tool}")
 
     return agent
-
-
-# Create the global agent instance
-root_agent = create_day_planner_agent()
-
-logger.info(
-    "Day Planner Agent successfully initialized with %d tool(s)", len(root_agent.tools)
-)
