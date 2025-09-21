@@ -82,9 +82,6 @@ def test_day_planner_agent_callbacks_configured():
     assert callable(agent.after_tool_callback)
 
 
-
-
-
 class TestDebugCallbacks:
     """Test suite for debug callback functions"""
 

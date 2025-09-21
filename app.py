@@ -456,6 +456,7 @@ class ChatbotManager:
         else:
             return "demo"
 
+
 def initialize_session_state():
     """Initialize Streamlit session state variables"""
     if "messages" not in st.session_state:
@@ -558,6 +559,7 @@ def render_sidebar():
         """
         )
 
+
 def export_chat_history():
     """Export chat history as JSON"""
     try:
@@ -640,6 +642,7 @@ def render_chat_interface():
             if time_display:
                 st.caption(f"⏰ {time_display}")
 
+
 def handle_user_input():
     """Handle user input and generate response"""
     if prompt := st.chat_input("Type your message here..."):
@@ -708,6 +711,7 @@ def handle_user_input():
             agent_title = selected_agent.replace("_", " ").title()
             timestamp = datetime.now().strftime("%H:%M")
             st.caption(f"⏰ {timestamp} • Agent: {agent_title}")
+
 
 def main():
     """Main application function"""

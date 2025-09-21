@@ -12,6 +12,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def main():
     """Run the Streamlit app"""
     app_path = Path(__file__).parent / "app.py"

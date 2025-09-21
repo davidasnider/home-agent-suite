@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 logger.info("Initializing Day Planner Agent")
 logger.debug(f"Agent configuration: name=day_planner_agent, model={MODEL_NAME}")
 
+
 def _before_model_debug(**kwargs):
     """Debug callback before model is called"""
     logger.info("🚀 BEFORE MODEL CALLBACK")
@@ -173,6 +174,7 @@ def _after_tool_debug(**kwargs):
     if error:
         logger.debug(f"❌ Tool error: {error}")
 
+
 def create_day_planner_agent() -> Agent:
     """
     Creates and configures the Day Planner Agent with weather integration.
@@ -219,7 +221,7 @@ def create_day_planner_agent() -> Agent:
         before_tool_callback=combined_before_tool_callback,
         after_tool_callback=_after_tool_debug,
     )
-    
+
     # DEBUG: Log final agent configuration
     logger.debug(f"🔧 Agent created with {len(agent.tools)} tools")
     for i, tool in enumerate(agent.tools):
