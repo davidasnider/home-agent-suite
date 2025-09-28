@@ -1,0 +1,400 @@
+{
+  "weather_scenarios": [
+    {
+      "name": "basic_weather_query",
+      "description": "Simple weather query for a major city",
+      "user_input": "What's the weather like in New York?",
+      "expected_elements": ["temperature", "weather", "new york"],
+      "api_response": {
+        "timelines": {
+          "hourly": [
+            {
+              "time": "2025-09-28T14:00:00Z",
+              "values": {
+                "temperature": 75,
+                "humidity": 65,
+                "windSpeed": 8.5,
+                "weatherCode": 1000,
+                "precipitationProbability": 10
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "weather_with_location_clarification",
+      "description": "Weather query that might need location clarification",
+      "user_input": "What's the weather like in Paris?",
+      "expected_elements": ["paris", "temperature", "weather"],
+      "api_response": {
+        "timelines": {
+          "hourly": [
+            {
+              "time": "2025-09-28T15:00:00Z",
+              "values": {
+                "temperature": 68,
+                "humidity": 70,
+                "windSpeed": 12.0,
+                "weatherCode": 1001,
+                "precipitationProbability": 25
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "weather_planning_query",
+      "description": "Weather query for activity planning",
+      "user_input": "Should I go for a run today? What's the weather like?",
+      "expected_elements": ["run", "weather", "outdoor", "activity"],
+      "api_response": {
+        "timelines": {
+          "hourly": [
+            {
+              "time": "2025-09-28T16:00:00Z",
+              "values": {
+                "temperature": 72,
+                "humidity": 55,
+                "windSpeed": 5.0,
+                "weatherCode": 1000,
+                "precipitationProbability": 5
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "search_scenarios": [
+    {
+      "name": "basic_search_query",
+      "description": "Simple information search",
+      "user_input": "Find information about artificial intelligence",
+      "expected_elements": ["artificial intelligence", "search", "results"],
+      "api_response": {
+        "items": [
+          {
+            "title": "Introduction to Artificial Intelligence",
+            "snippet": "Comprehensive guide to AI concepts, machine learning, and applications in modern technology.",
+            "link": "https://www.ai-guide.com"
+          },
+          {
+            "title": "AI Research and Development",
+            "snippet": "Latest developments in artificial intelligence research and breakthrough technologies.",
+            "link": "https://www.ai-research.org"
+          }
+        ]
+      }
+    },
+    {
+      "name": "location_based_search",
+      "description": "Search for location-specific information",
+      "user_input": "Find the best coffee shops in Seattle",
+      "expected_elements": ["coffee", "seattle", "shops", "best"],
+      "api_response": {
+        "items": [
+          {
+            "title": "Top 10 Coffee Shops in Seattle",
+            "snippet": "Discover Seattle's finest coffee shops, from artisanal roasters to cozy neighborhood cafes.",
+            "link": "https://www.seattle-coffee.com"
+          },
+          {
+            "title": "Seattle Coffee Culture Guide",
+            "snippet": "Explore Seattle's rich coffee culture with recommendations for every taste and budget.",
+            "link": "https://www.coffee-culture-seattle.com"
+          }
+        ]
+      }
+    },
+    {
+      "name": "how_to_search",
+      "description": "Instructional or how-to search query",
+      "user_input": "How to learn Python programming",
+      "expected_elements": ["python", "programming", "learn", "how"],
+      "api_response": {
+        "items": [
+          {
+            "title": "Complete Python Programming Tutorial",
+            "snippet": "Step-by-step guide to learning Python from basics to advanced concepts with practical examples.",
+            "link": "https://www.python-tutorial.com"
+          },
+          {
+            "title": "Python Learning Resources",
+            "snippet": "Curated collection of Python learning materials, courses, and practice projects.",
+            "link": "https://www.python-resources.org"
+          }
+        ]
+      }
+    }
+  ],
+  "mixed_scenarios": [
+    {
+      "name": "weather_then_search",
+      "description": "Weather query followed by search query",
+      "conversation": [
+        {
+          "user_input": "What's the weather like in Portland?",
+          "expected_elements": ["weather", "portland", "temperature"]
+        },
+        {
+          "user_input": "Find indoor activities in Portland",
+          "expected_elements": ["indoor", "activities", "portland"]
+        }
+      ],
+      "weather_response": {
+        "timelines": {
+          "hourly": [
+            {
+              "time": "2025-09-28T17:00:00Z",
+              "values": {
+                "temperature": 65,
+                "humidity": 80,
+                "windSpeed": 15.0,
+                "weatherCode": 4000,
+                "precipitationProbability": 75
+              }
+            }
+          ]
+        }
+      },
+      "search_response": {
+        "items": [
+          {
+            "title": "Indoor Activities in Portland",
+            "snippet": "Great indoor attractions for rainy days including museums, galleries, and entertainment venues.",
+            "link": "https://www.portland-indoor.com"
+          }
+        ]
+      }
+    },
+    {
+      "name": "search_then_weather",
+      "description": "Search query followed by weather query",
+      "conversation": [
+        {
+          "user_input": "Find hiking trails near Denver",
+          "expected_elements": ["hiking", "trails", "denver"]
+        },
+        {
+          "user_input": "What's the weather like for hiking in Denver today?",
+          "expected_elements": ["weather", "denver", "hiking", "today"]
+        }
+      ],
+      "search_response": {
+        "items": [
+          {
+            "title": "Best Hiking Trails Near Denver",
+            "snippet": "Discover amazing hiking trails within driving distance of Denver, from easy walks to challenging climbs.",
+            "link": "https://www.denver-hiking.com"
+          }
+        ]
+      },
+      "weather_response": {
+        "timelines": {
+          "hourly": [
+            {
+              "time": "2025-09-28T18:00:00Z",
+              "values": {
+                "temperature": 78,
+                "humidity": 45,
+                "windSpeed": 8.0,
+                "weatherCode": 1000,
+                "precipitationProbability": 10
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "error_scenarios": [
+    {
+      "name": "weather_api_down",
+      "description": "Weather API returns 500 error",
+      "user_input": "What's the weather like?",
+      "api_error": {
+        "service": "weather",
+        "status_code": 500,
+        "message": "Internal Server Error"
+      },
+      "expected_elements": ["sorry", "unable", "weather", "service"]
+    },
+    {
+      "name": "search_api_quota_exceeded",
+      "description": "Search API returns quota exceeded error",
+      "user_input": "Search for restaurants",
+      "api_error": {
+        "service": "search",
+        "status_code": 429,
+        "message": "Quota exceeded"
+      },
+      "expected_elements": ["quota", "search", "unable", "limitation"]
+    },
+    {
+      "name": "network_timeout",
+      "description": "Network request times out",
+      "user_input": "Check the weather in Tokyo",
+      "api_error": {
+        "service": "weather",
+        "error_type": "timeout",
+        "message": "Request timed out"
+      },
+      "expected_elements": ["timeout", "slow", "try again", "network"]
+    },
+    {
+      "name": "invalid_location",
+      "description": "Weather request for invalid location",
+      "user_input": "What's the weather in Atlantis?",
+      "api_error": {
+        "service": "weather",
+        "status_code": 400,
+        "message": "Location not found"
+      },
+      "expected_elements": ["location", "found", "valid", "city"]
+    }
+  ],
+  "conversation_flows": [
+    {
+      "name": "weather_planning_conversation",
+      "description": "Multi-turn conversation about weather and planning",
+      "turns": [
+        {
+          "user_input": "Hi, I'm planning my day",
+          "expected_elements": ["planning", "help", "day"]
+        },
+        {
+          "user_input": "What's the weather like in Chicago?",
+          "expected_elements": ["chicago", "weather", "temperature"]
+        },
+        {
+          "user_input": "Is it good weather for outdoor activities?",
+          "expected_elements": ["outdoor", "activities", "good", "weather"]
+        },
+        {
+          "user_input": "What outdoor activities would you recommend?",
+          "expected_elements": ["recommend", "outdoor", "activities"]
+        }
+      ]
+    },
+    {
+      "name": "search_refinement_conversation",
+      "description": "Conversation that refines search queries",
+      "turns": [
+        {
+          "user_input": "I'm looking for information",
+          "expected_elements": ["looking", "information", "help"]
+        },
+        {
+          "user_input": "Find restaurants",
+          "expected_elements": ["restaurants", "search", "find"]
+        },
+        {
+          "user_input": "I meant Italian restaurants in Boston",
+          "expected_elements": ["italian", "restaurants", "boston"]
+        },
+        {
+          "user_input": "Which ones are best for a romantic dinner?",
+          "expected_elements": ["romantic", "dinner", "best"]
+        }
+      ]
+    },
+    {
+      "name": "context_preservation_conversation",
+      "description": "Conversation testing context preservation",
+      "turns": [
+        {
+          "user_input": "What's the weather in Miami?",
+          "expected_elements": ["miami", "weather", "temperature"]
+        },
+        {
+          "user_input": "Is that temperature good for swimming?",
+          "expected_elements": ["temperature", "swimming", "good"]
+        },
+        {
+          "user_input": "What about for beach volleyball?",
+          "expected_elements": ["beach", "volleyball", "weather"]
+        },
+        {
+          "user_input": "Thanks for the weather info",
+          "expected_elements": ["thanks", "weather", "welcome"]
+        }
+      ]
+    }
+  ],
+  "agent_responses": [
+    {
+      "scenario": "weather_success",
+      "response": {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "The current weather is {temperature}°F with {conditions}. {additional_info}"
+                }
+              ],
+              "role": "model"
+            },
+            "finish_reason": "STOP"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "search_success",
+      "response": {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "I found several results for your search:\n\n{search_results}\n\nWould you like more specific information about any of these?"
+                }
+              ],
+              "role": "model"
+            },
+            "finish_reason": "STOP"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "service_error",
+      "response": {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "I'm sorry, I'm currently unable to access {service_name} due to a service issue. Please try again in a few minutes or let me know if there's another way I can help."
+                }
+              ],
+              "role": "model"
+            },
+            "finish_reason": "STOP"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "general_help",
+      "response": {
+        "candidates": [
+          {
+            "content": {
+              "parts": [
+                {
+                  "text": "I'm here to help! I can assist you with weather information, web searches, and general questions. What would you like to know?"
+                }
+              ],
+              "role": "model"
+            },
+            "finish_reason": "STOP"
+          }
+        ]
+      }
+    }
+  ]
+}
