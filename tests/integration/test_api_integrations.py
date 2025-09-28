@@ -25,7 +25,8 @@ async def test_tomorrow_io_api_integration(setup_api_mocks, mock_tomorrow_io_res
 
     # Mock environment for API key
     with patch.dict(
-        "os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
     ):  # pragma: allowlist secret
         try:
             # Test API call with mocked response
@@ -75,7 +76,10 @@ async def test_tomorrow_io_api_error_handling(requests_mock):
             text=error_message,
         )
 
-        with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+        with patch.dict(
+            "os.environ",
+            {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        ):  # pragma: allowlist secret
 
             try:
                 result = get_tmrw_weather_tool("New York, NY")
@@ -112,7 +116,9 @@ async def test_google_search_api_integration(
     if len(search_tools) > 0:
         search_tool = search_tools[0]
 
-        with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_api_key"}):
+        with patch.dict(
+            "os.environ", {"GOOGLE_API_KEY": "test_api_key"}  # pragma: allowlist secret
+        ):
             try:
                 # Test search functionality using run_async method
                 result = await search_tool.run_async(query="Paris attractions")
@@ -162,7 +168,10 @@ async def test_google_search_api_error_handling(requests_mock):
         if len(search_tools) > 0:
             search_tool = search_tools[0]
 
-            with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_api_key"}):
+            with patch.dict(
+                "os.environ",
+                {"GOOGLE_API_KEY": "test_api_key"},  # pragma: allowlist secret
+            ):
                 try:
                     result = await search_tool.run_async(query="test query")
 
@@ -187,7 +196,10 @@ async def test_api_timeout_handling(requests_mock):
         "https://api.tomorrow.io/v4/weather/forecast", exc=Timeout("Request timed out")
     )
 
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+    with patch.dict(
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+    ):
 
         try:
             result = get_tmrw_weather_tool("New York, NY")
@@ -220,7 +232,10 @@ async def test_api_connection_error_handling(requests_mock):
         exc=ConnectionError("Connection failed"),
     )
 
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+    with patch.dict(
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+    ):
 
         try:
             result = get_tmrw_weather_tool("New York, NY")
@@ -254,7 +269,10 @@ async def test_api_rate_limiting_handling(requests_mock):
         text="Rate limit exceeded",
     )
 
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+    with patch.dict(
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+    ):
 
         try:
             result = get_tmrw_weather_tool("New York, NY")
@@ -285,7 +303,10 @@ async def test_api_response_validation(requests_mock, mock_tomorrow_io_response)
         "https://api.tomorrow.io/v4/weather/forecast", json=mock_tomorrow_io_response
     )
 
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+    with patch.dict(
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+    ):
 
         try:
             result = get_tmrw_weather_tool("New York, NY")
@@ -333,7 +354,10 @@ async def test_api_malformed_response_handling(requests_mock):
             headers={"content-type": "application/json"},
         )
 
-        with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+        with patch.dict(
+            "os.environ",
+            {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        ):
 
             try:
                 result = get_tmrw_weather_tool("New York, NY")
@@ -354,7 +378,10 @@ async def test_concurrent_api_requests(setup_api_mocks):
     """
     from tomorrow_io_client.client import get_tmrw_weather_tool
 
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+    with patch.dict(
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+    ):
 
         # Create multiple concurrent requests
         locations = ["New York", "Los Angeles", "Chicago", "Houston"]

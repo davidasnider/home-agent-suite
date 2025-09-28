@@ -578,19 +578,21 @@ async def test_concurrent_error_scenario_e2e(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": "I'm experiencing issues with multiple services right "
-                            "now, which means I can't access weather data or "
-                            "perform web searches at the moment.\n\n**Current "
-                            "status:**\n" Weather service: Temporarily "
-                            "unavailable\n" Search service: Experiencing issues\n\n"
-                            "**What I can still help with:**\n- General questions "
-                            "and information I already know\n- Conversation and "
-                            "assistance with planning\n- Technical explanations "
-                            "and advice\n\n**What to try:**\n- Check back in a "
-                            "few minutes for service restoration\n- Use direct "
-                            "websites (weather.com, google.com) for urgent "
-                            "needs\n\nHow else can I assist you while the services "
-                            "recover?"
+                            "text": (
+                                "I'm experiencing issues with multiple services "
+                                "right now. I can't access weather data or "
+                                "perform web searches at the moment.\n\n"
+                                "**Current status:**\n- Weather service: "
+                                "Temporarily unavailable\n- Search service: "
+                                "Experiencing issues\n\n**What I can still "
+                                "help with:**\n- General questions and info I "
+                                "already know\n- Conversation and planning help\n- "
+                                "Technical explanations and advice\n\n**What "
+                                "to try:**\n- Check back in a few minutes for "
+                                "service restoration\n- Use direct websites for "
+                                "urgent needs\n\nHow else can I assist you "
+                                "while the services recover?"
+                            )
                         }
                     ],
                     "role": "model",
@@ -616,7 +618,7 @@ async def test_concurrent_error_scenario_e2e(requests_mock):
 
         # Request that would use multiple failing services
         at.chat_input[0].set_value(
-            "Can you check the weather and also search for local restaurants?"
+            "Can you check the weather and also search for local " "restaurants?"
         ).run()
 
         # Verify multi-service failure handling
@@ -648,7 +650,8 @@ async def test_concurrent_error_scenario_e2e(requests_mock):
 @pytest.mark.asyncio
 async def test_graceful_degradation_scenario_e2e(requests_mock):
     """
-    Tests that the system gracefully degrades functionality when services are partially available.
+    Tests that the system gracefully degrades functionality when services are
+    partially available.
     """
     # Mock one service working, one failing
     requests_mock.get(
@@ -678,7 +681,59 @@ async def test_graceful_degradation_scenario_e2e(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": "I can provide you with weather information, but "
-                            "I'm currently unable to perform web searches due to rate "
-                            "limiting.\n\n**Weather Update:**\nThe current weather "
-                            "is 72F with clear skies - perfect "
+                            "text": (
+                                "I can provide you with weather information, but "
+                                "I am currently unable to perform web searches "
+                                "due to rate limiting.\n\n**Weather Update:**\n"
+                                "The current weather is 72F with clear skies.\n\n"
+                                "**Note on Search:**\nThe search service is "
+                                "currently rate limited and may return errors or "
+                                "incomplete results.\n\n**What I can do:**\n- "
+                                "Provide detailed weather information for locations "
+                                "you ask about\n- Offer general guidance and "
+                                "suggestions based on known facts.\n\nIf you'd "
+                                "like, I can give the weather update now and try the "
+                                "search again later when rate limiting eases."
+                            )
+                        }
+                    ],
+                    "role": "model",
+                },
+                "finish_reason": "STOP",
+            }
+        ]
+    }
+
+    def mock_llm_call(*args, **kwargs):
+        if "generateContent" in kwargs.get("url", ""):
+            return Response(
+                200,
+                json=degradation_response,
+                headers={"content-type": "application/json"},
+            )
+        return Response(200, json={}, headers={"content-type": "application/json"})
+
+    with patch(
+        "google.genai._api_client.AsyncHttpxClient.request", side_effect=mock_llm_call
+    ):
+        at = AppTest.from_file("app.py").run()
+
+        # Ask for both weather and a search (one service is rate-limited)
+        at.chat_input[0].set_value(
+            "What's the weather in San Francisco and can you search for "
+            "nearby coffee shops?"
+        ).run()
+
+        # Verify graceful degradation behavior
+        assert not at.exception
+
+        markdown_content = [
+            md.value
+            for md in at.markdown
+            if md.value and not md.value.startswith("<style>")
+        ]
+        all_content = " ".join(markdown_content)
+
+        # Should include a weather update and mention rate limiting for search
+        assert "72f" in all_content.lower() or "weather" in all_content.lower()
+        assert "rate" in all_content.lower() or "rate limit" in all_content.lower()

@@ -1,0 +1,18 @@
+[run]
+# Limit the coverage measurement to our source directories. Using '.' is OK
+# because we'll omit tests below, but listing common source dirs improves
+# clarity for contributors.
+source =
+    agents
+    libs
+    app.py
+
+[report]
+# Omit test files and virtual envs from the report so tests themselves aren't
+# counted as uncovered source.
+omit =
+    */tests/*
+    tests/*
+    .venv/*
+    __pycache__/*
+    */__pycache__/*

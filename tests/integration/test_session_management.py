@@ -191,7 +191,10 @@ async def test_multi_turn_conversation_context(setup_api_mocks, mock_google_adk_
                     "content": {
                         "parts": [
                             {
-                                "text": "I'll help you plan your day. What city are you in?"
+                                "text": (
+                                    "I'll help you plan your day. "
+                                    "What city are you in?"
+                                )
                             }
                         ],
                         "role": "model",
@@ -206,8 +209,11 @@ async def test_multi_turn_conversation_context(setup_api_mocks, mock_google_adk_
                     "content": {
                         "parts": [
                             {
-                                "text": "Great! New York has beautiful weather today - "
-                                "75F and sunny. Perfect for outdoor activities."
+                                "text": (
+                                    "Great! New York has beautiful weather today - "
+                                    "75F and sunny. "
+                                    "Perfect for outdoor activities."
+                                )
                             }
                         ],
                         "role": "model",
@@ -222,10 +228,12 @@ async def test_multi_turn_conversation_context(setup_api_mocks, mock_google_adk_
                     "content": {
                         "parts": [
                             {
-                                "text": "Based on the sunny weather in New York I "
-                                "mentioned, I'd recommend Central Park, the High "
-                                "Line, or Brooklyn Bridge for great outdoor "
-                                "experiences."
+                                "text": (
+                                    "Based on the sunny weather in New York I "
+                                    "mentioned, I'd recommend Central Park, the "
+                                    "High Line, or Brooklyn Bridge for great "
+                                    "outdoor experiences."
+                                )
                             }
                         ],
                         "role": "model",

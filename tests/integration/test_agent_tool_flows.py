@@ -97,8 +97,7 @@ async def test_google_search_agent_uses_search_tool(
         for tool in google_search_agent.tools
         if hasattr(tool, "name") and "search" in tool.name.lower()
     ]
-    if len(search_tools) == 0:
-        # Fallback: check for any Google-related tools
+    if not search_tools:
         search_tools = [
             tool
             for tool in google_search_agent.tools
@@ -106,7 +105,7 @@ async def test_google_search_agent_uses_search_tool(
             and "search" in tool.__class__.__name__.lower()
         ]
 
-    assert len(search_tools) > 0
+    assert search_tools
 
     search_tool = search_tools[0]
     assert search_tool is not None
@@ -126,8 +125,8 @@ async def test_weather_tool_integration_with_api(
     weather_tool = day_planner_agent.tools[0]
 
     with patch.dict(
-        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}
-    ):  # pragma: allowlist secret
+        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}  # pragma: allowlist secret
+    ):
         try:
             # Test tool execution with mocked API
             result = weather_tool(location="New York, NY")
@@ -136,7 +135,7 @@ async def test_weather_tool_integration_with_api(
             if result is not None:
                 # Check if result is a string (formatted response) or dict
                 if isinstance(result, str):
-                    assert len(result) > 0
+                    assert result
                 elif isinstance(result, dict):
                     # Should contain weather information
                     assert any(
@@ -164,7 +163,7 @@ async def test_search_tool_integration_with_api(
         for tool in google_search_agent.tools
         if hasattr(tool, "name") and "search" in tool.name.lower()
     ]
-    if len(search_tools) == 0:
+    if not search_tools:
         search_tools = [
             tool
             for tool in google_search_agent.tools
@@ -172,11 +171,16 @@ async def test_search_tool_integration_with_api(
             and "search" in tool.__class__.__name__.lower()
         ]
 
-    if len(search_tools) > 0:
+    if search_tools:
         search_tool = search_tools[0]
 
         # Mock environment variable for API key
-        with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_key"}):
+        with patch.dict(
+            "os.environ",
+            {
+                "GOOGLE_API_KEY": "test_key",  # pragma: allowlist secret
+            },
+        ):
             try:
                 # Test tool execution with mocked API
                 if callable(search_tool):
@@ -189,7 +193,7 @@ async def test_search_tool_integration_with_api(
                 # Verify result contains expected search data structure
                 if result is not None:
                     if isinstance(result, str):
-                        assert len(result) > 0
+                        assert result
                     elif isinstance(result, dict):
                         # Should contain search results
                         assert any(
@@ -218,7 +222,9 @@ async def test_agent_tool_error_handling(day_planner_agent, requests_mock):
 
     weather_tool = day_planner_agent.tools[0]
 
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_key"}):
+    with patch.dict(
+        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}  # pragma: allowlist secret
+    ):
         try:
             # This should handle the error gracefully
             result = weather_tool(location="Invalid Location")
@@ -228,12 +234,12 @@ async def test_agent_tool_error_handling(day_planner_agent, requests_mock):
                 assert isinstance(result, (str, dict))
                 if isinstance(result, str):
                     # Error messages should be informative
-                    assert len(result) > 0
+                    assert result
 
         except Exception as e:
             # If exceptions are raised, they should be informative
             assert isinstance(e, Exception)
-            assert len(str(e)) > 0
+            assert str(e)
 
 
 @pytest.mark.asyncio
@@ -246,21 +252,22 @@ async def test_tool_response_format_consistency(
     # Test weather tool response format
     weather_tool = day_planner_agent.tools[0]
 
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_key"}):
+    with patch.dict(
+        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}  # pragma: allowlist secret
+    ):
         try:
             weather_result = weather_tool(location="New York")
 
             if weather_result is not None:
-                # Weather responses should be either structured dicts or formatted strings
                 assert isinstance(weather_result, (str, dict))
 
                 if isinstance(weather_result, str):
                     # String responses should be non-empty and readable
-                    assert len(weather_result.strip()) > 0
+                    assert weather_result.strip()
 
                 elif isinstance(weather_result, dict):
                     # Dict responses should have expected structure
-                    assert len(weather_result) > 0
+                    assert weather_result
 
         except Exception:
             # Tool configuration should at least be valid
@@ -272,18 +279,22 @@ async def test_tool_response_format_consistency(
         for tool in google_search_agent.tools
         if hasattr(tool, "name") and "search" in tool.name.lower()
     ]
-    if len(search_tools) == 0:
-        search_tools = [
-            tool
-            for tool in google_search_agent.tools
-            if hasattr(tool, "__class__")
-            and "search" in tool.__class__.__name__.lower()
-        ]
+    if not search_tools:
+        # Fallback: inspect class names for 'search' in their name
+        search_tools = []
+        for tool in google_search_agent.tools:
+            if hasattr(tool, "__class__"):
+                cls_name = tool.__class__.__name__.lower()
+                if "search" in cls_name:
+                    search_tools.append(tool)
 
-    if len(search_tools) > 0:
+    if search_tools:
         search_tool = search_tools[0]
 
-        with patch.dict("os.environ", {"GOOGLE_API_KEY": "test_key"}):
+        with patch.dict(
+            "os.environ",
+            {"GOOGLE_API_KEY": "test_key"},  # pragma: allowlist secret
+        ):
             try:
                 if callable(search_tool):
                     search_result = search_tool(query="test query")
@@ -293,14 +304,13 @@ async def test_tool_response_format_consistency(
                     search_result = None
 
                 if search_result is not None:
-                    # Search responses should be either structured dicts or formatted strings
                     assert isinstance(search_result, (str, dict))
 
                     if isinstance(search_result, str):
-                        assert len(search_result.strip()) > 0
+                        assert search_result.strip()
 
                     elif isinstance(search_result, dict):
-                        assert len(search_result) > 0
+                        assert search_result
 
             except Exception:
                 # Tool should at least be a valid tool object

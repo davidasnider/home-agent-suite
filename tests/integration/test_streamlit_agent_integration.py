@@ -138,8 +138,9 @@ async def test_streamlit_session_state_management(
             ]
         )
 
-        # Should have more content after second interaction (conversation history preserved)
-        assert final_markdown_count >= initial_markdown_count
+    # Should have more content after second interaction
+    # (conversation history preserved)
+    assert final_markdown_count >= initial_markdown_count
 
 
 @pytest.mark.skip(
@@ -219,12 +220,14 @@ async def test_streamlit_agent_response_display(
                 "content": {
                     "parts": [
                         {
-                            "text": """Based on the current weather data for New York:\n\n"""
-                            """**Temperature**: 75F\n**Conditions**: Clear """
-                            """skies\n**Wind**: 8 mph from the west\n**Humidity**: """
-                            """65%\n\n**Recommendations**:\n- Great day for """
-                            """outdoor activities\n- Perfect for a walk in Central """
-                            """Park\n- Consider bringing sunglasses"""
+                            "text": (
+                                "Based on the current weather data for New York:\n\n"
+                                "**Temperature**: 75F\n**Conditions**: Clear skies\n"
+                                "**Wind**: 8 mph from the west\n**Humidity**: 65%\n\n"
+                                "**Recommendations**:\n- Great day for outdoor "
+                                "activities\n- Perfect for a walk in Central Park\n- "
+                                "Consider bringing sunglasses"
+                            )
                         }
                     ],
                     "role": "model",
@@ -294,7 +297,10 @@ async def test_streamlit_multiple_agent_interactions(
                     "content": {
                         "parts": [
                             {
-                                "text": "I found several great restaurants in Paris, including..."
+                                "text": (
+                                    "I found several great restaurants in Paris, "
+                                    "including..."
+                                )
                             }
                         ],
                         "role": "model",
