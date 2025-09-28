@@ -6,12 +6,11 @@ between agents, tools, and the Streamlit application.
 """
 
 import pytest
-import json
 import os
 import sys
 from unittest.mock import Mock, patch
 from httpx import Response
-import requests_mock
+
 
 # Add agents and libs to Python path for testing
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -61,12 +60,14 @@ def mock_google_search_response():
         "items": [
             {
                 "title": "Paris Tourism - Official Site",
-                "snippet": "Discover the top attractions in Paris including the Eiffel Tower, Louvre Museum, and Notre Dame Cathedral.",
+                "snippet": "Discover the top attractions in Paris including the "
+                "Eiffel Tower, Louvre Museum, and Notre Dame Cathedral.",
                 "link": "https://www.paris-tourism.com",
             },
             {
                 "title": "10 Best Things to Do in Paris",
-                "snippet": "From iconic landmarks to hidden gems, explore the best activities and attractions in the City of Light.",
+                "snippet": "From iconic landmarks to hidden gems, explore the best "
+                "activities and attractions in the City of Light.",
                 "link": "https://www.travel-guide.com/paris",
             },
         ]
@@ -82,7 +83,9 @@ def mock_llm_response():
                 "content": {
                     "parts": [
                         {
-                            "text": "Based on the weather data, I recommend outdoor activities between 2-4 PM when temperatures will be around 75-76F with clear skies."
+                            "text": "Based on the weather data, I recommend outdoor "
+                            "activities between 2-4 PM when temperatures will be "
+                            "around 75-76F with clear skies."
                         }
                     ],
                     "role": "model",
@@ -102,7 +105,8 @@ def mock_supervisor_llm_response():
                 "content": {
                     "parts": [
                         {
-                            "text": "I'll help you with the weather information. Let me check the current conditions."
+                            "text": "I'll help you with the weather information. Let "
+                            "me check the current conditions."
                         }
                     ],
                     "role": "model",

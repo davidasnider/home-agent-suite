@@ -10,11 +10,8 @@ Tests the integration with external APIs, verifying that:
 """
 
 import pytest
-from unittest.mock import Mock, patch
-import requests_mock
+from unittest.mock import patch
 import asyncio
-import time
-import json
 from requests.exceptions import ConnectionError, Timeout
 
 
@@ -27,7 +24,9 @@ async def test_tomorrow_io_api_integration(setup_api_mocks, mock_tomorrow_io_res
     from tomorrow_io_client.client import get_tmrw_weather_tool
 
     # Mock environment for API key
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}):
+    with patch.dict(
+        "os.environ", {"TOMORROW_IO_API_KEY": "test_api_key"}
+    ):  # pragma: allowlist secret
         try:
             # Test API call with mocked response
             result = get_tmrw_weather_tool("New York, NY")
@@ -45,7 +44,7 @@ async def test_tomorrow_io_api_integration(setup_api_mocks, mock_tomorrow_io_res
                     for word in ["temperature", "weather", "forecast"]
                 )
 
-        except Exception as e:
+        except Exception:
             # If direct API call fails, verify the mock is set up correctly
             assert "timelines" in mock_tomorrow_io_response
             assert "hourly" in mock_tomorrow_io_response["timelines"]
@@ -131,7 +130,7 @@ async def test_google_search_api_integration(
                             for word in ["paris", "attractions", "search"]
                         )
 
-            except Exception as e:
+            except Exception:
                 # Verify tool is properly configured
                 assert callable(search_tool.run_async)
 
@@ -371,7 +370,7 @@ async def test_concurrent_api_requests(setup_api_mocks):
 
         # Should handle concurrent requests without issues
         # At least some results should be successful
-        successful_results = [r for r in results if r is not None]
+        [r for r in results if r is not None]
 
         # Even if some fail, the system should remain stable
         assert len(results) == len(locations)

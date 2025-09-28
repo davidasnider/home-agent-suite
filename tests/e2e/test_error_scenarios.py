@@ -11,15 +11,15 @@ Tests complete error scenarios and recovery workflows, verifying that:
 
 import pytest
 from streamlit.testing.v1 import AppTest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from httpx import Response
-import json
 import time
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import Timeout
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_weather_api_failure_scenario_e2e(requests_mock):
@@ -40,18 +40,16 @@ async def test_weather_api_failure_scenario_e2e(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": """I apologize, but I'm currently unable to retrieve weather information due to a service issue with the weather data provider. This could be due to:
-
-" Temporary server issues
-" Network connectivity problems
-" Service maintenance
-
-**What you can do:**
-- Try your request again in a few minutes
-- Check a weather website directly (weather.com, accuweather.com)
-- Ask me about something else I can help with
-
-Is there anything else I can assist you with in the meantime?"""
+                            "text": "I apologize, but I'm currently unable to retrieve "
+                            "weather information due to a service issue with the "
+                            "weather data provider. This could be due to:\n\n"
+                            "• Temporary server issues\n• Network connectivity "
+                            "problems\n• Service maintenance\n\n**What you can "
+                            "do:**\n- Try your request again in a few minutes\n- "
+                            "Check a weather website directly (weather.com, "
+                            "accuweather.com)\n- Ask me about something else I "
+                            "can help with\n\nIs there anything else I can assist "
+                            "you with in the meantime?"
                         }
                     ],
                     "role": "model",
@@ -95,7 +93,8 @@ Is there anything else I can assist you with in the meantime?"""
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_search_api_failure_scenario_e2e(requests_mock):
@@ -116,14 +115,15 @@ async def test_search_api_failure_scenario_e2e(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": """I'm sorry, but I'm currently unable to perform web searches due to an API limitation. This appears to be a quota or permission issue with the search service.
-
-**Alternative suggestions:**
-- Try searching directly on Google, Bing, or DuckDuckGo
-- I can still help with weather information, general questions, or other topics
-- The search functionality should be restored shortly
-
-Would you like me to help you with something else instead?"""
+                            "text": "I'm sorry, but I'm currently unable to perform "
+                            "web searches due to an API limitation. This appears to "
+                            "be a quota or permission issue with the search "
+                            "service.\n\n**Alternative suggestions:**\n- Try "
+                            "searching directly on Google, Bing, or DuckDuckGo\n- "
+                            "I can still help with weather information, general "
+                            "questions, or other topics\n- The search functionality "
+                            "should be restored shortly\n\nWould you like me to "
+                            "help you with something else instead?"
                         }
                     ],
                     "role": "model",
@@ -169,7 +169,8 @@ Would you like me to help you with something else instead?"""
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_network_timeout_scenario_e2e(requests_mock):
@@ -193,18 +194,16 @@ async def test_network_timeout_scenario_e2e(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": """I'm experiencing a timeout while trying to fetch weather data. This usually happens when:
-
-" The weather service is responding slowly
-" There are network connectivity issues
-" The service is under heavy load
-
-**Recommendations:**
-- Please try your weather request again
-- The service usually responds faster on retry
-- If the issue persists, there may be a temporary service outage
-
-Would you like to try again, or can I help you with something else?"""
+                            "text": "I'm experiencing a timeout while trying to fetch "
+                            "weather data. This usually happens when:\n\n• The "
+                            "weather service is responding slowly\n• There are "
+                            "network connectivity issues\n• The service is under "
+                            "heavy load\n\n**Recommendations:**\n- Please try "
+                            "your weather request again\n- The service usually "
+                            "responds faster on retry\n- If the issue persists, "
+                            "there may be a temporary service outage\n\nWould you "
+                            "like to try again, or can I help you with something "
+                            "else?"
                         }
                     ],
                     "role": "model",
@@ -248,7 +247,8 @@ Would you like to try again, or can I help you with something else?"""
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_invalid_user_input_scenario_e2e(requests_mock):
@@ -278,7 +278,10 @@ async def test_invalid_user_input_scenario_e2e(requests_mock):
                     "content": {
                         "parts": [
                             {
-                                "text": "I notice your message contains some unusual characters or formatting. Could you please rephrase your question? I'm here to help with weather information, search queries, and general assistance."
+                                "text": "I notice your message contains some unusual "
+                                "characters or formatting. Could you please rephrase "
+                                "your question? I'm here to help with weather "
+                                "information, search queries, and general assistance."
                             }
                         ],
                         "role": "model",
@@ -293,7 +296,10 @@ async def test_invalid_user_input_scenario_e2e(requests_mock):
                     "content": {
                         "parts": [
                             {
-                                "text": "I see you've sent a very long message. I can help you, but it would be easier if you could break down your request into smaller, more specific questions. What's the main thing you'd like to know?"
+                                "text": "I see you've sent a very long message. I can "
+                                "help you, but it would be easier if you could break "
+                                "down your request into smaller, more specific "
+                                "questions. What's the main thing you'd like to know?"
                             }
                         ],
                         "role": "model",
@@ -308,7 +314,11 @@ async def test_invalid_user_input_scenario_e2e(requests_mock):
                     "content": {
                         "parts": [
                             {
-                                "text": "I'm not sure I understand that request. I can help you with:\n• Weather information for any location\n• Web searches for information\n• General questions and assistance\n\nWhat would you like to know?"
+                                "text": "I'm not sure I understand that request. I can "
+                                "help you with:\n• Weather information for any "
+                                "location\n• Web searches for information\n• "
+                                "General questions and assistance\n\nWhat would "
+                                "you like to know?"
                             }
                         ],
                         "role": "model",
@@ -373,7 +383,8 @@ async def test_invalid_user_input_scenario_e2e(requests_mock):
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_llm_service_failure_scenario_e2e(requests_mock):
@@ -421,7 +432,8 @@ async def test_llm_service_failure_scenario_e2e(requests_mock):
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_partial_service_recovery_scenario_e2e(requests_mock):
@@ -463,7 +475,8 @@ async def test_partial_service_recovery_scenario_e2e(requests_mock):
                     "content": {
                         "parts": [
                             {
-                                "text": "I'm sorry, the weather service is currently unavailable. Please try again in a moment."
+                                "text": "I'm sorry, the weather service is currently "
+                                "unavailable. Please try again in a moment."
                             }
                         ],
                         "role": "model",
@@ -478,7 +491,8 @@ async def test_partial_service_recovery_scenario_e2e(requests_mock):
                     "content": {
                         "parts": [
                             {
-                                "text": "Great! The weather service is working again. The weather in Miami is currently 78F and sunny!"
+                                "text": "Great! The weather service is working again. "
+                                "The weather in Miami is currently 78F and sunny!"
                             }
                         ],
                         "role": "model",
@@ -536,7 +550,8 @@ async def test_partial_service_recovery_scenario_e2e(requests_mock):
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_concurrent_error_scenario_e2e(requests_mock):
@@ -563,22 +578,19 @@ async def test_concurrent_error_scenario_e2e(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": """I'm experiencing issues with multiple services right now, which means I can't access weather data or perform web searches at the moment.
-
-**Current status:**
-" Weather service: Temporarily unavailable
-" Search service: Experiencing issues
-
-**What I can still help with:**
-- General questions and information I already know
-- Conversation and assistance with planning
-- Technical explanations and advice
-
-**What to try:**
-- Check back in a few minutes for service restoration
-- Use direct websites (weather.com, google.com) for urgent needs
-
-How else can I assist you while the services recover?"""
+                            "text": "I'm experiencing issues with multiple services right "
+                            "now, which means I can't access weather data or "
+                            "perform web searches at the moment.\n\n**Current "
+                            "status:**\n" Weather service: Temporarily "
+                            "unavailable\n" Search service: Experiencing issues\n\n"
+                            "**What I can still help with:**\n- General questions "
+                            "and information I already know\n- Conversation and "
+                            "assistance with planning\n- Technical explanations "
+                            "and advice\n\n**What to try:**\n- Check back in a "
+                            "few minutes for service restoration\n- Use direct "
+                            "websites (weather.com, google.com) for urgent "
+                            "needs\n\nHow else can I assist you while the services "
+                            "recover?"
                         }
                     ],
                     "role": "model",
@@ -630,7 +642,8 @@ How else can I assist you while the services recover?"""
 
 
 @pytest.mark.skip(
-    reason="E2E tests require complex app-level mocking - use integration tests for component testing"
+    reason="E2E tests require complex app-level mocking - "
+    "use integration tests for component testing"
 )
 @pytest.mark.asyncio
 async def test_graceful_degradation_scenario_e2e(requests_mock):
@@ -665,62 +678,7 @@ async def test_graceful_degradation_scenario_e2e(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": """I can provide you with weather information, but I'm currently unable to perform web searches due to rate limiting.
-
-**Weather Update:**
-The current weather is 72F with clear skies - perfect conditions!
-
-**Regarding your search request:**
-I can't access web search right now due to service limits, but I can suggest:
-- Try searching directly on Google for restaurant recommendations
-- I can provide general advice about finding good restaurants
-- The search functionality should be restored shortly
-
-Would you like more weather details, or can I help you in another way?"""
-                        }
-                    ],
-                    "role": "model",
-                },
-                "finish_reason": "STOP",
-            }
-        ]
-    }
-
-    def mock_llm_call(*args, **kwargs):
-        if "generateContent" in kwargs.get("url", ""):
-            return Response(
-                200,
-                json=degradation_response,
-                headers={"content-type": "application/json"},
-            )
-        return Response(200, json={}, headers={"content-type": "application/json"})
-
-    with patch(
-        "google.genai._api_client.AsyncHttpxClient.request", side_effect=mock_llm_call
-    ):
-        at = AppTest.from_file("app.py").run()
-
-        # Request that uses both working and failing services
-        at.chat_input[0].set_value(
-            "What's the weather like and can you find nearby restaurants?"
-        ).run()
-
-        # Verify graceful degradation
-        assert not at.exception
-
-        markdown_content = [
-            md.value
-            for md in at.markdown
-            if md.value and not md.value.startswith("<style>")
-        ]
-        all_content = " ".join(markdown_content)
-
-        # Should provide available information and explain limitations
-        assert "72" in all_content  # Weather data should be present
-        assert (
-            "rate limit" in all_content.lower() or "can't access" in all_content.lower()
-        )
-        assert (
-            "try searching directly" in all_content.lower()
-            or "suggest" in all_content.lower()
-        )
+                            "text": "I can provide you with weather information, but "
+                            "I'm currently unable to perform web searches due to rate "
+                            "limiting.\n\n**Weather Update:**\nThe current weather "
+                            "is 72F with clear skies - perfect "

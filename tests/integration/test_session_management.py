@@ -9,12 +9,8 @@ Tests the integration of session management across the application, verifying th
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import streamlit as st
+from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
-import asyncio
-import json
-import uuid
 from httpx import Response
 
 
@@ -36,7 +32,8 @@ async def test_conversation_history_persistence(
                     "content": {
                         "parts": [
                             {
-                                "text": "Hello! I'm your assistant. How can I help you today?"
+                                "text": "Hello! I'm your assistant. How can I help you "
+                                "today?"
                             }
                         ],
                         "role": "model",
@@ -51,7 +48,8 @@ async def test_conversation_history_persistence(
                     "content": {
                         "parts": [
                             {
-                                "text": "The weather in New York is currently 75F and sunny."
+                                "text": "The weather in New York is currently 75F and "
+                                "sunny."
                             }
                         ],
                         "role": "model",
@@ -66,7 +64,8 @@ async def test_conversation_history_persistence(
                     "content": {
                         "parts": [
                             {
-                                "text": "Yes, as I mentioned, it's 75F in New York - perfect for outdoor activities!"
+                                "text": "Yes, as I mentioned, it's 75F in New York - "
+                                "perfect for outdoor activities!"
                             }
                         ],
                         "role": "model",
@@ -207,7 +206,8 @@ async def test_multi_turn_conversation_context(setup_api_mocks, mock_google_adk_
                     "content": {
                         "parts": [
                             {
-                                "text": "Great! New York has beautiful weather today - 75F and sunny. Perfect for outdoor activities."
+                                "text": "Great! New York has beautiful weather today - "
+                                "75F and sunny. Perfect for outdoor activities."
                             }
                         ],
                         "role": "model",
@@ -222,7 +222,10 @@ async def test_multi_turn_conversation_context(setup_api_mocks, mock_google_adk_
                     "content": {
                         "parts": [
                             {
-                                "text": "Based on the sunny weather in New York I mentioned, I'd recommend Central Park, the High Line, or Brooklyn Bridge for great outdoor experiences."
+                                "text": "Based on the sunny weather in New York I "
+                                "mentioned, I'd recommend Central Park, the High "
+                                "Line, or Brooklyn Bridge for great outdoor "
+                                "experiences."
                             }
                         ],
                         "role": "model",

@@ -9,9 +9,7 @@ Tests the integration between agents and their tools, verifying that:
 """
 
 import pytest
-from unittest.mock import Mock, patch
-import asyncio
-import json
+from unittest.mock import patch
 
 
 @pytest.mark.asyncio
@@ -23,13 +21,14 @@ async def test_supervisor_delegates_to_day_planner(
     to the day_planner agent.
     """
     # Mock the supervisor's LLM response to delegate to day planner
-    supervisor_response = {
+    {
         "candidates": [
             {
                 "content": {
                     "parts": [
                         {
-                            "text": "I'll help you check the weather. Let me use the day planner to get current weather information."
+                            "text": "I'll help you check the weather. Let me use the "
+                            "day planner to get current weather information."
                         }
                     ],
                     "role": "model",
@@ -74,7 +73,7 @@ async def test_day_planner_agent_uses_weather_tool(
         result = weather_tool(location="New York")
         # Should return mocked weather data
         assert result is not None
-    except Exception as e:
+    except Exception:
         # If direct tool call fails due to complex agent internals,
         # we can still verify the tool is properly attached
         assert callable(weather_tool)
@@ -126,8 +125,9 @@ async def test_weather_tool_integration_with_api(
     # Get the weather tool from day planner
     weather_tool = day_planner_agent.tools[0]
 
-    # Mock environment variable for API key
-    with patch.dict("os.environ", {"TOMORROW_IO_API_KEY": "test_key"}):
+    with patch.dict(
+        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}
+    ):  # pragma: allowlist secret
         try:
             # Test tool execution with mocked API
             result = weather_tool(location="New York, NY")
@@ -144,7 +144,7 @@ async def test_weather_tool_integration_with_api(
                         for key in ["temperature", "weather", "temp"]
                     )
 
-        except Exception as e:
+        except Exception:
             # If tool execution fails due to complex integration,
             # verify the tool is properly configured
             assert weather_tool.__name__ == "get_tmrw_weather_tool"
@@ -197,7 +197,7 @@ async def test_search_tool_integration_with_api(
                             for key in ["results", "items", "title"]
                         )
 
-            except Exception as e:
+            except Exception:
                 # If tool execution fails due to complex integration,
                 # verify the tool is properly configured
                 assert hasattr(search_tool, "__class__")

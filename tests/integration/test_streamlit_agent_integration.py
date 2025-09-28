@@ -9,11 +9,8 @@ Tests the integration between the Streamlit UI and agents, verifying that:
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import streamlit as st
+from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
-import asyncio
-import json
 from httpx import Response
 
 
@@ -34,7 +31,8 @@ async def test_streamlit_supervisor_agent_communication(
                 "content": {
                     "parts": [
                         {
-                            "text": "The weather in New York is currently 75F with clear skies. Perfect for outdoor activities!"
+                            "text": "The weather in New York is currently 75F with "
+                            "clear skies. Perfect for outdoor activities!"
                         }
                     ],
                     "role": "model",
@@ -166,7 +164,8 @@ async def test_streamlit_error_handling_in_ui(requests_mock):
                 "content": {
                     "parts": [
                         {
-                            "text": "I'm sorry, I'm having trouble accessing the weather service right now."
+                            "text": "I'm sorry, I'm having trouble accessing the "
+                            "weather service right now."
                         }
                     ],
                     "role": "model",
@@ -220,17 +219,12 @@ async def test_streamlit_agent_response_display(
                 "content": {
                     "parts": [
                         {
-                            "text": """Based on the current weather data for New York:
-
-**Temperature**: 75F
-**Conditions**: Clear skies
-**Wind**: 8 mph from the west
-**Humidity**: 65%
-
-**Recommendations**:
-- Great day for outdoor activities
-- Perfect for a walk in Central Park
-- Consider bringing sunglasses"""
+                            "text": """Based on the current weather data for New York:\n\n"""
+                            """**Temperature**: 75F\n**Conditions**: Clear """
+                            """skies\n**Wind**: 8 mph from the west\n**Humidity**: """
+                            """65%\n\n**Recommendations**:\n- Great day for """
+                            """outdoor activities\n- Perfect for a walk in Central """
+                            """Park\n- Consider bringing sunglasses"""
                         }
                     ],
                     "role": "model",
@@ -346,7 +340,6 @@ async def test_streamlit_multiple_agent_interactions(
             for md in at.markdown
             if md.value and not md.value.startswith("<style>")
         ]
-        all_content = " ".join(markdown_content)
 
         # Should contain elements from both interactions
         assert len(markdown_content) >= 2  # At least user messages and responses
