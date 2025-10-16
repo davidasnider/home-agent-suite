@@ -14,6 +14,10 @@ from unittest.mock import patch
 import asyncio
 from requests.exceptions import ConnectionError, Timeout
 
+TEST_TOMORROW_IO_API_KEY = (
+    "test_api_key_for_integration_tests_1234567890"  # pragma: allowlist secret
+)
+
 
 @pytest.mark.asyncio
 async def test_tomorrow_io_api_integration(setup_api_mocks, mock_tomorrow_io_response):
@@ -26,7 +30,7 @@ async def test_tomorrow_io_api_integration(setup_api_mocks, mock_tomorrow_io_res
     # Mock environment for API key
     with patch.dict(
         "os.environ",
-        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):  # pragma: allowlist secret
         try:
             # Test API call with mocked response
@@ -78,7 +82,9 @@ async def test_tomorrow_io_api_error_handling(requests_mock):
 
         with patch.dict(
             "os.environ",
-            {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+            {
+                "TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY
+            },  # pragma: allowlist secret
         ):  # pragma: allowlist secret
 
             try:
@@ -198,7 +204,7 @@ async def test_api_timeout_handling(requests_mock):
 
     with patch.dict(
         "os.environ",
-        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
 
         try:
@@ -234,7 +240,7 @@ async def test_api_connection_error_handling(requests_mock):
 
     with patch.dict(
         "os.environ",
-        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
 
         try:
@@ -271,7 +277,7 @@ async def test_api_rate_limiting_handling(requests_mock):
 
     with patch.dict(
         "os.environ",
-        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
 
         try:
@@ -305,7 +311,7 @@ async def test_api_response_validation(requests_mock, mock_tomorrow_io_response)
 
     with patch.dict(
         "os.environ",
-        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
 
         try:
@@ -356,7 +362,9 @@ async def test_api_malformed_response_handling(requests_mock):
 
         with patch.dict(
             "os.environ",
-            {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+            {
+                "TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY
+            },  # pragma: allowlist secret
         ):
 
             try:
@@ -380,7 +388,7 @@ async def test_concurrent_api_requests(setup_api_mocks):
 
     with patch.dict(
         "os.environ",
-        {"TOMORROW_IO_API_KEY": "test_api_key"},  # pragma: allowlist secret
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
 
         # Create multiple concurrent requests

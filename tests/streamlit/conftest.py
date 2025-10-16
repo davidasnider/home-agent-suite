@@ -114,7 +114,9 @@ def mock_environment_variables():
         "os.environ",
         {
             "GOOGLE_API_KEY": "test_key",  # pragma: allowlist secret
-            "TOMORROW_IO_API_KEY": "test_weather_key",  # pragma: allowlist secret
+            "TOMORROW_IO_API_KEY": (
+                "test_weather_key_for_streamlit_tests_1234567890"
+            ),  # pragma: allowlist secret
         },
     ):
         yield
