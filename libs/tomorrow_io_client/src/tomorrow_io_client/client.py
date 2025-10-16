@@ -29,6 +29,7 @@ For MCP and agentic AI systems, this client:
 """
 
 from datetime import datetime, timezone
+from functools import lru_cache
 import re
 import requests
 import tzlocal
@@ -66,7 +67,15 @@ class Settings(BaseSettings):
         logger.info("Initialized Tomorrow.io Settings with base_url=%s", self.base_url)
 
 
-settings = Settings()  # type: ignore values come from .env or environment variables
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    """Lazily load settings so tests can override environment configuration."""
+    return Settings()  # type: ignore values come from .env or environment variables
+
+
+def reset_settings_cache() -> None:
+    """Clear cached settings, primarily for use in tests."""
+    get_settings.cache_clear()
 
 
 def get_tmrw_weather_tool(location: str) -> dict:
@@ -114,6 +123,7 @@ def get_tmrw_weather_tool(location: str) -> dict:
             "forecast": None,
         }
 
+    settings = get_settings()
     params = {
         "location": sanitized_location,
         "timesteps": "1h",

@@ -11,6 +11,10 @@ Tests the integration between agents and their tools, verifying that:
 import pytest
 from unittest.mock import patch
 
+TEST_TOMORROW_IO_API_KEY = (
+    "test_api_key_for_agent_tool_flows_1234567890"  # pragma: allowlist secret
+)
+
 
 @pytest.mark.asyncio
 async def test_supervisor_delegates_to_day_planner(
@@ -125,7 +129,8 @@ async def test_weather_tool_integration_with_api(
     weather_tool = day_planner_agent.tools[0]
 
     with patch.dict(
-        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}  # pragma: allowlist secret
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
         try:
             # Test tool execution with mocked API
@@ -223,7 +228,8 @@ async def test_agent_tool_error_handling(day_planner_agent, requests_mock):
     weather_tool = day_planner_agent.tools[0]
 
     with patch.dict(
-        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}  # pragma: allowlist secret
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
         try:
             # This should handle the error gracefully
@@ -253,7 +259,8 @@ async def test_tool_response_format_consistency(
     weather_tool = day_planner_agent.tools[0]
 
     with patch.dict(
-        "os.environ", {"TOMORROW_IO_API_KEY": "test_key"}  # pragma: allowlist secret
+        "os.environ",
+        {"TOMORROW_IO_API_KEY": TEST_TOMORROW_IO_API_KEY},  # pragma: allowlist secret
     ):
         try:
             weather_result = weather_tool(location="New York")

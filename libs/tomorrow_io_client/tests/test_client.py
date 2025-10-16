@@ -14,6 +14,9 @@ MOCK_URL = "https://api.tomorrow.io/v4/weather/forecast"
 @pytest.fixture(autouse=True)
 def set_env(monkeypatch):
     monkeypatch.setenv("TOMORROW_IO_API_KEY", MOCK_API_KEY)
+    client_module.reset_settings_cache()
+    yield
+    client_module.reset_settings_cache()
 
 
 @pytest.fixture
@@ -309,8 +312,9 @@ def test_cloudy_weather_description(requests_mock):
     assert "cloudy" in result["forecast"]
 
 
-def test_special_characters_in_location():
+def test_special_characters_in_location(requests_mock, sample_response):
     """Test location strings with special characters"""
+    requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
     special_locations = [
         "São Paulo, Brazil",
         "México City",
@@ -336,8 +340,9 @@ def test_empty_location_string():
     assert result["forecast"] is None
 
 
-def test_location_with_coordinates():
+def test_location_with_coordinates(requests_mock, sample_response):
     """Test location with coordinate format"""
+    requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
     coordinate_locations = [
         "40.7128,-74.0060",  # NYC coordinates
         "51.5074,-0.1278",  # London coordinates
@@ -351,8 +356,9 @@ def test_location_with_coordinates():
         assert "status" in result
 
 
-def test_location_with_zip_codes():
+def test_location_with_zip_codes(requests_mock, sample_response):
     """Test various zip code formats"""
+    requests_mock.get(MOCK_URL, json=sample_response, status_code=200)
     zip_locations = [
         "10001",  # US zip
         "zip:10001",  # Explicit zip format
