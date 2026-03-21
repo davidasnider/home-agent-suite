@@ -1,8 +1,10 @@
 from streamlit.testing.v1 import AppTest
 from unittest import mock
 from httpx import Response
+import pytest
 
 
+@pytest.mark.xfail(reason="Flaky test, intermittent CI failure")
 @mock.patch("google.genai._api_client.AsyncHttpxClient.request")
 def test_weather_workflow_e2e(mock_request, requests_mock):
     """

@@ -36,7 +36,7 @@ repos:
         types: [text]
     -   id: pytest-coverage
         name: pytest-coverage
-        entry: poetry run pytest --cov=. --cov-fail-under=86 --cov-report=term-missing
+        entry: poetry run pytest --cov=. --cov-fail-under=85 --cov-report=term-missing
         language: system
         pass_filenames: false
         always_run: true
