@@ -505,13 +505,11 @@ def render_sidebar():
         primary_agent = st.session_state.chatbot_manager.get_primary_agent()
         if primary_agent == "supervisor":
             st.success("🧠 **Supervisor Agent Active**")
-            st.markdown(
-                """
+            st.markdown("""
             The supervisor agent intelligently routes your queries to:
             - 🌤️ **Weather & Planning** for forecasts and activities
             - 🔍 **Web Search** for information and research
-            """
-            )
+            """)
         else:
             st.warning("🎭 **Demo Mode**")
             st.markdown("Using demo agent - check configuration for full functionality")
@@ -549,15 +547,13 @@ def render_sidebar():
 
         # Information
         st.subheader("ℹ️ About")
-        st.markdown(
-            """
+        st.markdown("""
         This chatbot integrates with:
         - **Day Planner Agent**: Weather-based activity planning
         - **Google Search Agent**: Real-time information retrieval
 
         Built with Streamlit and Google ADK.
-        """
-        )
+        """)
 
 
 def export_chat_history():

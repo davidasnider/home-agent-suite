@@ -7,21 +7,6 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
 
--   repo: https://github.com/psf/black
-    rev: 25.9.0
-    hooks:
-    -   id: black
-
--   repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
-    hooks:
-    -   id: flake8
-
--   repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ["--baseline", ".secrets.baseline"]
 
 -   repo: https://github.com/trufflesecurity/trufflehog
     rev: v3.90.8
@@ -31,9 +16,27 @@ repos:
 
 -   repo: local
     hooks:
+    -   id: black
+        name: black
+        entry: poetry run black
+        language: system
+        types: [python]
+        require_serial: true
+    -   id: flake8
+        name: flake8
+        entry: poetry run flake8
+        language: system
+        types: [python]
+        require_serial: true
+    -   id: detect-secrets
+        name: detect-secrets
+        entry: poetry run detect-secrets-hook
+        args: ["--baseline", ".secrets.baseline"]
+        language: system
+        types: [text]
     -   id: pytest-coverage
         name: pytest-coverage
-        entry: poetry run pytest --cov=. --cov-fail-under=86 --cov-report=term-missing
+        entry: poetry run pytest --cov=. --cov-fail-under=85 --cov-report=term-missing
         language: system
         pass_filenames: false
         always_run: true

@@ -11,7 +11,6 @@ import sys
 from unittest.mock import Mock, patch
 from httpx import Response
 
-
 # Add agents and libs to Python path for testing
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 agents_dir = os.path.join(project_root, "agents")
