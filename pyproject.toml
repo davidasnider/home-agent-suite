@@ -15,11 +15,13 @@ pulumi-github = "^6.7.3"
 streamlit = "^1.48.0"
 google-adk = "^1.11.0"
 python-dotenv = "^1.1.1"
+geopy = "^2.4.1"
 tomorrow-io-client = {path = "libs/tomorrow_io_client", develop = true}
 # Agent dependencies - only supervisor as it's a proper package
 supervisor-agent = {path = "agents/supervisor", develop = true}
 # Shared libraries
 common-logging = {path = "libs/common_logging", develop = true}
+home-assistant-client = {path = "libs/home_assistant_client", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.3.0"

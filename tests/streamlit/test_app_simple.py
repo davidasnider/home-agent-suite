@@ -8,6 +8,9 @@ from unittest.mock import Mock, patch
 import sys
 import os
 import json
+import ui.backend as backend
+import ui.components as components  # noqa: F401
+import ui.styles as styles  # noqa: F401
 
 # Add the project root to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -21,11 +24,15 @@ class TestModuleLevel:
         import app
 
         # Basic checks
-        assert hasattr(app, "ChatbotManager")
         assert hasattr(app, "main")
         assert hasattr(app, "load_custom_css")
-        assert hasattr(app, "export_chat_history")
-        assert hasattr(app, "show_typing_indicator")
+        assert hasattr(app, "initialize_session_state")
+        assert hasattr(app, "render_sidebar")
+        assert hasattr(app, "render_chat_interface")
+        assert hasattr(app, "handle_user_input")
+
+        # ChatbotManager is now in backend
+        assert hasattr(backend, "ChatbotManager")
 
 
 class TestCSS:
@@ -34,7 +41,7 @@ class TestCSS:
     @patch("streamlit.markdown")
     def test_load_custom_css(self, mock_markdown):
         """Test CSS loading function."""
-        from app import load_custom_css
+        from ui.styles import load_custom_css
 
         load_custom_css()
 
@@ -60,7 +67,7 @@ class TestExport:
             {"role": "user", "content": "Hi", "timestamp": "2025-08-17T10:00:00Z"}
         ]
 
-        from app import export_chat_history
+        from ui.components import export_chat_history
 
         export_chat_history()
 
@@ -77,7 +84,7 @@ class TestExport:
     @patch("streamlit.error")
     def test_export_error(self, mock_error):
         """Test export error handling."""
-        from app import export_chat_history
+        from ui.components import export_chat_history
 
         export_chat_history()
 
@@ -103,7 +110,7 @@ class TestTypingIndicator:
         )
         mock_placeholder.container.return_value.__exit__ = Mock(return_value=None)
 
-        from app import show_typing_indicator
+        from ui.components import show_typing_indicator
 
         show_typing_indicator()
 
@@ -203,7 +210,7 @@ class TestChatInterface:
         mock_chat_message.return_value.__enter__ = Mock(return_value=mock_context)
         mock_chat_message.return_value.__exit__ = Mock(return_value=None)
 
-        from app import render_chat_interface
+        from ui.components import render_chat_interface
 
         render_chat_interface()
 
@@ -230,7 +237,7 @@ class TestSidebar:
         mock_sidebar.__enter__ = Mock()
         mock_sidebar.__exit__ = Mock()
 
-        from app import render_sidebar
+        from ui.components import render_sidebar
 
         render_sidebar()
 
@@ -244,7 +251,7 @@ class TestUserInput:
     @patch("streamlit.session_state")
     @patch("streamlit.chat_input")
     @patch("streamlit.chat_message")
-    @patch("app.show_typing_indicator")
+    @patch("ui.components.show_typing_indicator")
     def test_handle_user_input_no_input(
         self, mock_typing, mock_chat_message, mock_chat_input, mock_session_state
     ):
@@ -252,7 +259,7 @@ class TestUserInput:
         mock_session_state.messages = []
         mock_chat_input.return_value = None  # No input
 
-        from app import handle_user_input
+        from ui.components import handle_user_input
 
         handle_user_input()
 
@@ -263,7 +270,7 @@ class TestUserInput:
     @patch("streamlit.session_state")
     @patch("streamlit.chat_input")
     @patch("streamlit.chat_message")
-    @patch("app.show_typing_indicator")
+    @patch("ui.components.show_typing_indicator")
     def test_handle_user_input_with_input(
         self, mock_typing, mock_chat_message, mock_chat_input, mock_session_state
     ):
@@ -282,7 +289,7 @@ class TestUserInput:
         mock_chat_message.return_value.__enter__ = Mock(return_value=mock_context)
         mock_chat_message.return_value.__exit__ = Mock(return_value=None)
 
-        from app import handle_user_input
+        from ui.components import handle_user_input
 
         handle_user_input()
 
@@ -310,7 +317,7 @@ class TestUserInput:
         mock_session_state.last_request_time = time.time()
         mock_chat_input.return_value = "Test message"
 
-        from app import handle_user_input
+        from ui.components import handle_user_input
 
         handle_user_input()
 
@@ -328,7 +335,7 @@ class TestUserInput:
         mock_session_state.last_request_time = 0
         mock_chat_input.return_value = "a" * 1025
 
-        from app import handle_user_input
+        from ui.components import handle_user_input
 
         handle_user_input()
 
@@ -339,7 +346,7 @@ class TestUserInput:
     @patch("streamlit.session_state")
     @patch("streamlit.chat_input")
     @patch("streamlit.chat_message")
-    @patch("app.show_typing_indicator")
+    @patch("ui.components.show_typing_indicator")
     def test_handle_user_input_sanitization(
         self, mock_typing, mock_chat_message, mock_chat_input, mock_session_state
     ):
@@ -356,7 +363,7 @@ class TestUserInput:
         mock_chat_message.return_value.__enter__ = Mock(return_value=mock_context)
         mock_chat_message.return_value.__exit__ = Mock(return_value=None)
 
-        from app import handle_user_input
+        from ui.components import handle_user_input
 
         handle_user_input()
 
@@ -436,7 +443,7 @@ class TestEdgeCases:
             mock_chat_message.return_value.__enter__ = Mock(return_value=mock_context)
             mock_chat_message.return_value.__exit__ = Mock(return_value=None)
 
-            from app import render_chat_interface
+            from ui.components import render_chat_interface
 
             render_chat_interface()
 

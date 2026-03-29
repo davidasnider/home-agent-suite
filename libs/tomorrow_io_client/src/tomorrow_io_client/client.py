@@ -35,8 +35,8 @@ import requests
 import tzlocal
 from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from geopy.geocoders import Nominatim
 from common_logging.logging_utils import setup_logging
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -114,7 +114,37 @@ def get_tmrw_weather_tool(location: str) -> dict:
             "forecast": None,
         }
 
-    sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
+    # Geocoding logic
+    # Check if location is already a lat,lon pair
+    coord_pattern = r"^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$"
+    if not re.match(coord_pattern, location.strip()):
+        logger.info(
+            "Location '%s' does not look like coordinates, attempting to geocode",
+            location,
+        )
+        try:
+            geolocator = Nominatim(user_agent="HomeAgentSuite/1.0")
+            # Limit results to improve performance and avoid ambiguity
+            geo_location = geolocator.geocode(location, limit=1)
+
+            if geo_location:
+                sanitized_location = f"{geo_location.latitude},{geo_location.longitude}"
+                logger.info(
+                    "Successfully geocoded '%s' to '%s'", location, sanitized_location
+                )
+            else:
+                logger.warning(
+                    "Geocoding failed for '%s', falling back to original string",
+                    location,
+                )
+                sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
+        except Exception as e:
+            logger.error("Geocoding error for '%s': %s", location, e)
+            sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
+    else:
+        sanitized_location = location.strip()
+        logger.info("Using original coordinates: %s", sanitized_location)
+
     if not sanitized_location:
         return {
             "status": "error",

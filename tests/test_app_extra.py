@@ -1,6 +1,6 @@
 import types
-
-import app
+import streamlit as st
+import ui.backend as backend
 
 
 class DummySession(dict):
@@ -18,7 +18,7 @@ class DummySession(dict):
 
 def test_create_demo_agent_and_chat():
     # Use __new__ to avoid heavy initialization in __init__
-    mgr = app.ChatbotManager.__new__(app.ChatbotManager)
+    mgr = backend.ChatbotManager.__new__(backend.ChatbotManager)
     demo = mgr._create_demo_agent()
     resp = demo.chat("hello world")
     assert "Demo Agent Response" in resp
@@ -26,7 +26,7 @@ def test_create_demo_agent_and_chat():
 
 
 def test_get_primary_agent_logic():
-    mgr = app.ChatbotManager.__new__(app.ChatbotManager)
+    mgr = backend.ChatbotManager.__new__(backend.ChatbotManager)
     # When supervisor is present
     mgr.agents = {"supervisor": object()}
     assert mgr.get_primary_agent() == "supervisor"
@@ -38,25 +38,25 @@ def test_get_primary_agent_logic():
 
 def test_initialize_session_state_creates_manager_and_messages(monkeypatch):
     # Ensure new instances pick the demo fallback
-    monkeypatch.setattr(app, "SUPERVISOR_AVAILABLE", False)
+    monkeypatch.setattr(backend, "SUPERVISOR_AVAILABLE", False)
     # Ensure the module-level supervisor_error exists to avoid NameError
-    app.supervisor_error = "supervisor not present"
+    backend.supervisor_error = "supervisor not present"
 
     dummy = DummySession()
-    monkeypatch.setattr(app.st, "session_state", dummy, raising=False)
+    monkeypatch.setattr(st, "session_state", dummy, raising=False)
 
     # Call initialize - should populate messages and chatbot_manager
-    app.initialize_session_state()
+    backend.initialize_session_state()
 
-    assert "messages" in app.st.session_state
-    assert isinstance(app.st.session_state.messages, list)
-    assert "chatbot_manager" in app.st.session_state
+    assert "messages" in st.session_state
+    assert isinstance(st.session_state.messages, list)
+    assert "chatbot_manager" in st.session_state
     # chatbot_manager should be an instance of ChatbotManager
-    assert isinstance(app.st.session_state.chatbot_manager, app.ChatbotManager)
+    assert isinstance(st.session_state.chatbot_manager, backend.ChatbotManager)
 
 
 def test_extract_text_from_event_variants():
-    mgr = app.ChatbotManager.__new__(app.ChatbotManager)
+    mgr = backend.ChatbotManager.__new__(backend.ChatbotManager)
 
     # event with actions -> action.text
     Action = types.SimpleNamespace
