@@ -628,6 +628,38 @@ The following table serves as a high-level project plan, defining the objective,
 
 This step-by-step approach mitigates risk by ensuring that each component is built and validated before the next layer of complexity is added. It provides clear milestones and a tangible sense of progress throughout the development process.
 
+## Production Deployment
+
+### Containerization
+
+The application is fully containerized and ready for deployment to any OCI-compliant platform (Google Cloud Run, GKE, AWS Fargate).
+
+```bash
+# Build the production image
+docker build -t home-agent-suite .
+
+# Run locally to test
+docker run -p 8501:8501 --env-file .env home-agent-suite
+```
+
+### Google Cloud Platform (Recommended)
+
+1.  **Container Registry**: Push the image to Artifact Registry.
+2.  **Secret Manager**: Store `GOOGLE_API_KEY`, `TOMORROW_IO_API_KEY`, `HA_URL`, and `HA_TOKEN` in GCP Secret Manager.
+3.  **Cloud Run**: Deploy the service using the provided Dockerfile.
+    - Memory: 1GB+ recommended
+    - CPU: 1 vCPU+
+    - Concurrency: 80+
+
+### Infrastructure as Code
+
+This project uses **Pulumi** for infrastructure management. See the `infrastructure/` directory for provisioning scripts that automate the creation of GCP resources.
+
+```bash
+cd infrastructure/github
+pulumi up
+```
+
 ## Part 5: Uncovering the Unknowns: A Strategic Pre-Mortem
 
 A successful project plan anticipates not only the known tasks but also the potential challenges and complexities that may arise later. This section addresses the critical request to identify "the things I'm not thinking about" by conducting a strategic pre-mortem. These are second- and third-order considerations that will become increasingly important as the home agent suite matures from a simple bot into a deeply integrated home intelligence system.
