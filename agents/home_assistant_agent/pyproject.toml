@@ -3,6 +3,7 @@ name = "home-assistant-agent"
 version = "0.1.0"
 description = "Home Assistant Agent"
 authors = ["David Snider <david@davidsnider.org>"]
+license = "MIT"
 package-mode = false
 
 [tool.poetry.dependencies]
