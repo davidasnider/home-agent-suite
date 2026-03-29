@@ -16,9 +16,9 @@ def set_env(monkeypatch):
 
 @pytest.fixture
 def mock_geolocator():
-    with patch("tomorrow_io_client.client.Nominatim") as mock_nominatim:
+    with patch("tomorrow_io_client.client.get_geolocator") as mock_get:
         mock_instance = MagicMock()
-        mock_nominatim.return_value = mock_instance
+        mock_get.return_value = mock_instance
         yield mock_instance
 
 

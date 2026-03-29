@@ -78,6 +78,12 @@ def reset_settings_cache() -> None:
     get_settings.cache_clear()
 
 
+@lru_cache(maxsize=1)
+def get_geolocator() -> Nominatim:
+    """Lazily initialize the geolocator."""
+    return Nominatim(user_agent="HomeAgentSuite/1.0")
+
+
 def get_tmrw_weather_tool(location: str) -> dict:
     """
     Get a daily weather summary for a specified location using Tomorrow.io API.
@@ -123,7 +129,7 @@ def get_tmrw_weather_tool(location: str) -> dict:
             location,
         )
         try:
-            geolocator = Nominatim(user_agent="HomeAgentSuite/1.0")
+            geolocator = get_geolocator()
             # Limit results to improve performance and avoid ambiguity
             geo_location = geolocator.geocode(location, limit=1)
 

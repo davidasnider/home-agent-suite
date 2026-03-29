@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../s
 try:
     import supervisor.agent  # noqa: F401
 
-    print("✅ Successfully imported supervisor.agent")
+    print(f"✅ Successfully imported {supervisor.agent.__name__}")
 
 except Exception as e:
     print(f"❌ Failed to import: {e}")
