@@ -8,9 +8,9 @@ sys.path.insert(
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/")))
 
 try:
-    from supervisor.agent import create_supervisor_agent  # noqa: F401
+    import supervisor.agent  # noqa: F401
 
-    print("✅ Successfully imported create_supervisor_agent")
+    print("✅ Successfully imported supervisor.agent")
 
 except Exception as e:
     print(f"❌ Failed to import: {e}")

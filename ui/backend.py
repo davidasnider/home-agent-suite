@@ -45,10 +45,8 @@ class ChatbotManager:
         # Initialize supervisor agent only
         if SUPERVISOR_AVAILABLE:
             try:
-                self.agents["supervisor"] = create_supervisor_agent(
-                    session_service=self.shared_session_service
-                )
-                logger.info("Supervisor agent initialized with shared session service")
+                self.agents["supervisor"] = create_supervisor_agent()
+                logger.info("Supervisor agent initialized")
             except Exception as e:
                 logger.error(f"Failed to initialize supervisor agent: {e}")
                 logger.warning("Supervisor failed, adding demo agent")
@@ -85,6 +83,26 @@ class ChatbotManager:
                 return f"❌ Agent '{agent_name}' not found. Available: {available}"
 
             agent = self.agents[agent_name]
+
+            # Handle demo agent directly without using the ADK InMemoryRunner
+            if agent_name == "demo":
+                try:
+                    logger.info("Using DemoAgent for demo mode")
+                    return agent.chat(message)
+                except Exception as agent_error:
+                    error_str = str(agent_error)
+                    logger.error(
+                        "Demo agent call failed for %s: %s",
+                        agent_name,
+                        error_str,
+                    )
+                    ellipsis = "..." if len(message) > 50 else ""
+                    agent_title = agent_name.replace("_", " ").title()
+                    return (
+                        f"🤖 {agent_title} Agent (Demo): I received your "
+                        f"message '{message[:50]}{ellipsis}'.\n\n⚠️ Demo "
+                        f"Agent Error: {error_str}"
+                    )
 
             # Call the actual Google ADK agent
             try:

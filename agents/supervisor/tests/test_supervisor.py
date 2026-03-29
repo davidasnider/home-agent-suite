@@ -10,16 +10,9 @@ from supervisor.agent import create_supervisor_agent, MODEL_NAME
 
 def test_supervisor_agent_creation():
     """Test that supervisor agent is created successfully"""
-    from google.adk.sessions.in_memory_session_service import InMemorySessionService
-
-    # Test without session service
+    # Test agent creation
     agent = create_supervisor_agent()
     assert agent is not None
-
-    # Test with session service
-    svc = InMemorySessionService()
-    agent_with_svc = create_supervisor_agent(session_service=svc)
-    assert agent_with_svc is not None
     assert agent.name == "supervisor_agent"
     assert agent.model == MODEL_NAME
     assert agent.model == "gemini-2.5-flash"

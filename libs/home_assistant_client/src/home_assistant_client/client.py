@@ -30,8 +30,8 @@ def get_ha_headers() -> Dict[str, str]:
     """Get headers for Home Assistant API requests."""
     settings = get_settings()
     if not settings.ha_token:
-        logger.warning("Home Assistant token not found in settings.")
-        return {}
+        logger.error("Home Assistant token not found in settings.")
+        raise ValueError("Home Assistant token not configured.")
     return {
         "Authorization": f"Bearer {settings.ha_token.get_secret_value()}",
         "Content-Type": "application/json",

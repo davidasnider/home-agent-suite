@@ -37,9 +37,6 @@ except ImportError as e:
         f"Failed to import required dependencies: {e}. " f"Searched in: {agents_dir}"
     )
 
-from typing import Optional  # noqa: E402
-from google.adk.sessions import BaseSessionService  # noqa: E402
-
 # Model configuration
 MODEL_NAME = "gemini-2.5-flash"
 
@@ -50,18 +47,13 @@ logger = logging.getLogger(__name__)
 logger.info("Initializing Supervisor Agent")
 
 
-def create_supervisor_agent(
-    session_service: Optional[BaseSessionService] = None,
-) -> Agent:
+def create_supervisor_agent() -> Agent:
     """
     Creates and configures the Supervisor Agent with delegation capabilities.
 
     This agent acts as an intelligent router that analyzes user queries and
     delegates them to the most appropriate specialized agent. It uses the LLM's
     reasoning capabilities to make delegation decisions through a detailed prompt.
-
-    Args:
-        session_service: Optional session service to share with sub-agent tools.
 
     Returns:
         Agent: Configured Supervisor Agent with access to all specialized tools
@@ -114,8 +106,6 @@ def create_supervisor_agent(
     )
 
     logger.info("Creating supervisor agent with AgentTool wrappers")
-    if session_service:
-        logger.info(f"Using provided session service: {id(session_service)}")
 
     day_planner_agent = create_day_planner_agent()
     search_agent = create_google_search_agent()

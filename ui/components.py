@@ -49,7 +49,10 @@ def render_sidebar():
         col1, col2 = st.columns(2)
         with col1:
             if st.button("🗑️ Clear Chat", use_container_width=True):
-                st.session_state.messages = [st.session_state.messages[0]]
+                if hasattr(st.session_state, "messages") and st.session_state.messages:
+                    st.session_state.messages = [st.session_state.messages[0]]
+                else:
+                    st.session_state.messages = []
                 st.session_state.conversation_id = f"chat_{int(time.time())}"
                 st.rerun()
         with col2:

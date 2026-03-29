@@ -129,17 +129,12 @@ def get_tmrw_weather_tool(location: str) -> dict:
 
             if geo_location:
                 sanitized_location = f"{geo_location.latitude},{geo_location.longitude}"
-                logger.info(
-                    "Successfully geocoded '%s' to '%s'", location, sanitized_location
-                )
+                logger.info("Successfully geocoded location")
             else:
-                logger.warning(
-                    "Geocoding failed for '%s', falling back to original string",
-                    location,
-                )
+                logger.warning("Geocoding failed, falling back to original string")
                 sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
         except Exception as e:
-            logger.error("Geocoding error for '%s': %s", location, e)
+            logger.error("Geocoding error: %s", e)
             sanitized_location = re.sub(r"[^a-zA-Z0-9\s,'-.]", "", location)
     else:
         sanitized_location = location.strip()

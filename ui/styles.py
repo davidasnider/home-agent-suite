@@ -30,7 +30,7 @@ def load_custom_css():
     }
 
     /* Sidebar styling */
-    .css-1d391kg {
+    section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
     }
 

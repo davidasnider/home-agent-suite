@@ -23,7 +23,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 WORKDIR /app
 
 # Copy root project files
-COPY pyproject.toml poetry.lock* README.md ./
+COPY pyproject.toml README.md ./
 
 # Copy all components (agents and libs)
 COPY agents/ agents/
