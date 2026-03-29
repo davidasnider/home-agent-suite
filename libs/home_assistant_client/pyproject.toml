@@ -1,9 +1,10 @@
 [tool.poetry]
-name = "tomorrow-io-client"
+name = "home-assistant-client"
 version = "0.1.0"
-description = "A client library for the Tomorrow.io API."
+description = "A client library for the Home Assistant REST API."
 authors = ["David Snider <david@davidsnider.org>"]
 license = "MIT"
+
 [tool.poetry.dependencies]
 python = "^3.11"
 requests = "^2.31.0"
@@ -11,11 +12,12 @@ python-dotenv = "^1.0.0"
 pydantic = "^2.11.7"
 pydantic-settings = "^2.10.1"
 common_logging = { path = "../common_logging", develop = true }
-tzlocal = "^5.3.1"
-geopy = "^2.4.1"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.0"
 requests-mock = "^1.11.0"
 pytest-cov = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -10,13 +10,13 @@ from supervisor.agent import create_supervisor_agent, MODEL_NAME
 
 def test_supervisor_agent_creation():
     """Test that supervisor agent is created successfully"""
+    # Test agent creation
     agent = create_supervisor_agent()
-
     assert agent is not None
     assert agent.name == "supervisor_agent"
     assert agent.model == MODEL_NAME
-    assert agent.model == "gemini-2.5-pro"
-    assert len(agent.tools) == 2  # weather tool + google search
+    assert agent.model == "gemini-2.5-flash"
+    assert len(agent.tools) == 3  # weather + search + home assistant
 
 
 def test_supervisor_agent_has_weather_tool():
@@ -41,6 +41,17 @@ def test_supervisor_agent_has_search_tool():
     )
 
 
+def test_supervisor_agent_has_ha_tool():
+    """Test that supervisor agent has home assistant tool"""
+    agent = create_supervisor_agent()
+
+    # Check for ha_agent within AgentTool objects
+    assert any(
+        hasattr(tool, "agent") and "home_assistant" in tool.agent.name.lower()
+        for tool in agent.tools
+    )
+
+
 def test_supervisor_agent_instruction():
     """Test that supervisor agent has proper instruction"""
     agent = create_supervisor_agent()
@@ -53,4 +64,4 @@ def test_supervisor_agent_instruction():
 
 def test_supervisor_model_constant():
     """Test that MODEL_NAME constant is correct"""
-    assert MODEL_NAME == "gemini-2.5-pro"
+    assert MODEL_NAME == "gemini-2.5-flash"
