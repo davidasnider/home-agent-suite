@@ -14,7 +14,7 @@ tzlocal = "^5.3.1"
 pulumi = "^3.187.0"
 pulumi-github = "^6.7.3"
 streamlit = "^1.48.0"
-google-adk = "^1.11.0"
+google-adk = "^1.29.0"
 python-dotenv = "^1.1.1"
 geopy = "^2.4.1"
 tomorrow-io-client = {path = "libs/tomorrow_io_client", develop = true}
