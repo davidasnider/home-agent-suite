@@ -6,7 +6,7 @@ authors = ["davidasnider <david@davidsnider.org>"]
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-google-cloud-logging = "^3.7.0"
+google-cloud-logging = "^3.15.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
