@@ -6,7 +6,7 @@ authors = ["David Snider <david@davidsnider.org>"]
 license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.11"
-requests = "^2.31.0"
+requests = "^2.33.1"
 python-dotenv = "^1.2.2"
 pydantic = "^2.11.7"
 pydantic-settings = "^2.10.1"
