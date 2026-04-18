@@ -13,8 +13,8 @@ python = "^3.11"
 tzlocal = "^5.3.1"
 pulumi = "^3.187.0"
 pulumi-github = "^6.7.3"
-streamlit = "^1.48.0"
-google-adk = "^1.11.0"
+streamlit = "^1.56.0"
+google-adk = "^1.29.0"
 python-dotenv = "^1.1.1"
 geopy = "^2.4.1"
 tomorrow-io-client = {path = "libs/tomorrow_io_client", develop = true}
@@ -25,16 +25,16 @@ common-logging = {path = "libs/common_logging", develop = true}
 home-assistant-client = {path = "libs/home_assistant_client", develop = true}
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^4.3.0"
+pre-commit = "^4.5.1"
 black = "^26.3.1"
-flake8 = "^7.0.0"
+flake8 = "^7.3.0"
 detect-secrets = "^1.5.0"
-pytest-cov = "^7.0.0"
+pytest-cov = "^7.1.0"
 requests-mock = "^1.12.1"
 pytest-asyncio = "^1.2.0"
 aioresponses = "^0.7.4"
 pytest-mock = "^3.10.0"
-pytest-env = "^1.2.0"
+pytest-env = "^1.6.0"
 respx = "^0.22.0"
 
 [tool.black]
