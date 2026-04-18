@@ -6,9 +6,9 @@ authors = ["David Snider <david@davidsnider.org>"]
 license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.11"
-requests = "^2.31.0"
-python-dotenv = "^1.0.0"
-pydantic = "^2.11.7"
+requests = "^2.33.1"
+python-dotenv = "^1.2.2"
+pydantic = "^2.12.5"
 pydantic-settings = "^2.10.1"
 common_logging = { path = "../common_logging", develop = true }
 tzlocal = "^5.3.1"
