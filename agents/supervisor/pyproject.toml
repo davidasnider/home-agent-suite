@@ -10,7 +10,7 @@ packages = [{include = "supervisor", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 # Google ADK for agent framework
-google-adk = "^1.11.0"
+google-adk = ">=1.11,<3.0"
 # Local dependencies (path-based for development)
 common_logging = { path = "../../libs/common_logging", develop = true }
 tomorrow-io-client = { path = "../../libs/tomorrow_io_client", develop = true }
